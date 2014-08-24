@@ -1,0 +1,23 @@
+
+#+END_SRC
+
+There is also css injected into the web page:
+
+#+BEGIN_SRC css :tangle contentscript.css
+  div#rdfazerInterface {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 400px;
+      height: 100%;
+      background: white;
+      border: solid black 2px;
+      z-index: 999999999;
+      border-width: 0 0 0 2px;
+  }
+  div#rdfazerInterface.left {
+      top: 0;
+      left: 0;
+      right: auto;
+      border-width: 0 2px 0 0;
+  }

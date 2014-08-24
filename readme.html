@@ -1,0 +1,824 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>RDFazer</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="RDFazer"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-08-23 17:41:23 CEST"/>
+<meta name="author" content="Karel Kremer"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">RDFazer</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Introduction</a></li>
+<li><a href="#sec-2">2 Manifest file</a></li>
+<li><a href="#sec-3">3 Background</a></li>
+<li><a href="#sec-4">4 Utility Scripts</a></li>
+<li><a href="#sec-5">5 contentscript side</a>
+<ul>
+<li><a href="#sec-5-1">5.1 interacting with the dom tree</a></li>
+<li><a href="#sec-5-2">5.2 Backend api</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">6 style</a></li>
+<li><a href="#sec-7">7 Using the backend api</a>
+<ul>
+<li><a href="#sec-7-1">7.1 Format of search results</a></li>
+<li><a href="#sec-7-2">7.2 </a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+
+<p>RDFazer is a chrome browser plugin for tagging a website with RDFa concepts. It only tags the static page and does not store the content anywhere. It was concieved for taking an existing (static) webpage and tagging it with concepts from some taxonomy (e.g. the EC ESCO taxonomy). This page can then be stored elsewhere.
+</p>
+<p>
+This code was written based on the nice input from:
+</p><dl>
+<dt>the tutorial provided by google</dt><dd>e.g. <a href="https://developer.chrome.com/extensions/getstarted">https://developer.chrome.com/extensions/getstarted</a>
+</dd>
+<dt>stackoverflow</dt><dd>e.g. <a href="http://stackoverflow.com/questions/11684454/getting-the-source-html-of-the-current-page-from-chrome-extension">http://stackoverflow.com/questions/11684454/getting-the-source-html-of-the-current-page-from-chrome-extension</a>
+</dd>
+</dl>
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Manifest file</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>Chrome browser extensions require a json manifest file, dealing with permissions and setup of the extension. This is the file used for taggy:
+</p>
+
+
+
+<pre class="example">{
+  "name": "RDFazer",
+  "version": "0.1",
+  "manifest_version": 1,
+  "description": "Tag concepts on a page with RDFa",
+  "browser_action": {
+      "default_icon": "icon.png"
+  },
+    "content_scripts": [
+        {
+            "matches": ["&lt;all_urls&gt;"],
+            "css": ["jquery-ui.css","contentscript.css"],
+            "js": ["jquery-2.0.3.min.js","jquery-ui-1.10.4.custom.min.js","jquery.migrate.min.js","utils.js","backendApi.js","contentscript.js"]
+        }
+    ],
+    "background": {
+        "scripts":["jquery-2.0.3.min.js","background.js","utils.js"]
+    },
+    "permissions": ["tabs", "&lt;all_urls&gt;"],
+    "web_accessible_resources": ["jquery-2.0.3.min.map","jquery-2.0.3.js"]
+}
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Background</h2>
+<div class="outline-text-2" id="text-3">
+
+
+<p>
+There also is some code included on the background side of the extension. This is mostly to intercept the click of the button. This will send a message to the injected script on the web page to initiate the user interface. After that, it will exchange messages with the injected script and the back-end.
+</p>
+
+
+
+<pre class="example">function sendMessage (messagePayload, messageHandler){
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, messagePayload, messageHandler);
+    });
+}
+
+function ajax(ajaxData,hasParams){
+    ajaxData.url=ajaxData.url+(hasParams?"":"?")+"format=json";
+    ajaxData.dataType="json";
+    if(ajaxData.type!="GET"){
+        ajaxData.data=JSON.stringify(ajaxData.data);
+        ajaxData.contentType= "application/json; charset=utf-8";
+        ajaxData.processData=false;
+    }
+
+    $.ajax(ajaxData);       
+}
+
+
+function onWindowLoad() {
+
+}
+
+chrome.browserAction.onClicked.addListener(function(activeTab) {
+    sendMessage({type:"initTaggy"},function(response){
+        console.log("its a response");
+    });
+
+    this.ajax({
+        type: "GET",
+        url: "http://localhost/lot3-tools/concepts",
+        success: function(response,status){
+            console.log(status);
+        },
+        error: function(request,status,error){
+            console.log(status);
+        }
+    }); 
+
+});
+
+window.onload = onWindowLoad;
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+
+    }
+);
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Utility Scripts</h2>
+<div class="outline-text-2" id="text-4">
+
+<p>The scripts here will be included in both the backend and contentscript side. They provide some helpful library functions.
+</p>
+
+
+
+<pre class="example">function ajax (ajaxData,hasParams) {
+
+    ajaxData.url=ajaxData.url+(hasParams?"":"?")+"format=json";
+    ajaxData.dataType="json";
+    if(ajaxData.type!="GET"){
+        ajaxData.data=JSON.stringify(ajaxData.data);
+        ajaxData.contentType= "application/json; charset=utf-8";
+        ajaxData.processData=false;
+    }
+
+    $.ajax(ajaxData);       
+}  
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> contentscript side</h2>
+<div class="outline-text-2" id="text-5">
+
+
+</div>
+
+<div id="outline-container-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> interacting with the dom tree</h3>
+<div class="outline-text-3" id="text-5-1">
+
+<p>To fetch information from the running browser page, we need to inject the following javascript to the browser.
+</p>
+
+
+
+<pre class="example">function sendMessage (messagePayload, messageHandler){
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, messagePayload, messageHandler);
+    });
+}
+function handleServerError(request,status,error,stage){
+    var message = "An error occurred during " + stage+".\n"+
+        "The server responded with status code '"+status+"' and the error message was:\n'"+error+"'";
+    taggyMessage(message,"bad-message");
+}
+
+function taggyMessage(message,classes){
+    var body=document.getElementsByTagName("body");
+    var messageDiv=document.createElement("div");
+    $(messageDiv).addClass(classes+" taggyMessage").text(message);
+    setTimeout(function(){
+        $(messageDiv).addClass(classes+" taggyMessage-close")       
+        setTimeout(function(){$(messageDiv).remove()},3000);
+    },1500);
+    $(body[0]).append(messageDiv);
+    setTimeout(function(){
+        $(messageDiv).addClass("taggyMessage-open");
+    },0);
+}
+
+var Taggy = {
+
+    //* stores the current HTML page in the taggy component for storing it as a source when needed. TODO use and store the HTML
+    storeCurrentHTML: function() {
+        this.currentHTML = document.getElementsByTagName("html")[0].outerHTML;
+    },
+
+    addInterface: function(){
+        var taggyIF = $("#taggyInterface")[0];
+        if(taggyIF){
+            return taggyIF;
+        }else{
+            $("body").append("&lt;div id='taggyInterface' title='Tag Concepts'&gt;\n" +
+                             "&lt;div class='taggy-tabs'&gt;\n" +
+                             "&lt;ul&gt;\n" +
+                             "&lt;li&gt;&lt;a href='#taggy-tabs-1'&gt;Occupation&lt;/a&gt;&lt;/li&gt;\n" +
+                             "&lt;li&gt;&lt;a href='#taggy-tabs-2'&gt;Skill or Competence&lt;/a&gt;&lt;/li&gt;\n" +
+                             "&lt;li&gt;&lt;a href='#taggy-tabs-3'&gt;Qualification&lt;/a&gt;&lt;/li&gt;\n" +
+                             "&lt;/ul&gt;\n" +
+                             "&lt;div id='taggy-tabs-1'&gt;\n" +
+                             "&lt;h2&gt;Add Occupation&lt;/h2&gt;\n" +
+                             "&lt;/div&gt;\n" +
+                             "&lt;div id='taggy-tabs-2'&gt;\n" +
+                             "&lt;h2&gt;Add Competence&lt;/h2&gt;\n" +
+                             "&lt;/div&gt;\n" +
+                             "&lt;div id='taggy-tabs-3'&gt;\n" +
+                             "&lt;h2&gt;Add Qualification&lt;/h2&gt;\n" +
+                             "&lt;/div&gt;\n" +
+                             "&lt;/div&gt;\n" +
+                             "&lt;/div&gt;"
+                            );
+            $("#taggyInterface").find(".taggy-tabs").tabs();
+
+            var occPanel = this.addPanel("Preferred Term", $("#taggy-tabs-1")[0],"Occupation",
+                              {nonPreferredTerms:inputTypes.array,
+                               uri:inputTypes.uri,
+                               definition:inputTypes.longText});
+            occPanel.type = "Occupation";
+            var scPanel = this.addPanel("Preferred Term", $("#taggy-tabs-2")[0],"Skill",
+                              {nonPreferredTerms:inputTypes.array,
+                               uri:inputTypes.uri,
+                               definition:inputTypes.longText});
+            scPanel.type="Skill";
+            var qPanel = this.addPanel("Preferred Term", $("#taggy-tabs-3")[0],"Qualification",
+                              {nonPreferredTerms:inputTypes.array,
+                               uri:inputTypes.uri,
+                               definition:inputTypes.longText});
+            qPanel.type="Qualification";
+            $("#taggyInterface").dialog({width:"600px",
+                                         close:function(){
+                                             $("#taggyInterface").parent().remove();
+                                             $("#taggyInterface").remove();
+                                         }});
+            return $("#taggyInterface")[0];
+        }
+    },
+    //* adds a search input in the given container and activates the autocomplete functionality. resultFormat is a description of the result so input fields can be auto generated
+    addPanel:function(name,container,type,resultFormat) {
+        var self = this;
+
+        var panel = {};
+        $(container).append("&lt;div class='input'&gt;&lt;span class='label'&gt;"+name+"&lt;/span&gt;&lt;input class='search'&gt;&lt;/div&gt;");
+
+        var searchSuccess = function(type,request,response,data) {
+            self.handleConceptSearchResults(request,response,data,type);
+        };
+        var searchError = function(request,status,error){
+            handleServerError(request,status,error,"autocompletion");
+        };
+        var searchSelect = function( event, ui ) {
+            var item = ui.item;
+            if(item.value &amp;&amp; item.valueItem.isNewConcept){
+                // clear existing values
+                self.resetPanel(panel);
+            }else{
+                self.fillPanel(panel,item.valueItem);
+            }
+            console.log(item);
+        };
+
+        panel.preferredTerm = lot3backend.setupSearch($(container).find("input")[0],
+                                          type,panel,searchSuccess,searchError,
+                                          searchSelect);
+        var inputs = this.buildInputFields(container,resultFormat);
+        $(container).append("&lt;div class='taggy-bottom-butons'&gt;&lt;button name='Links'&gt;add links&lt;/button&gt;&lt;button name='Upload'&gt;upload&lt;/button&gt;&lt;/div&gt;");
+        panel.inputs = inputs;
+        panel.upload = $(container).find("button[name='Upload']")[0];
+        panel.links = $(container).find("button[name='Links']")[0];
+
+        var self = this;
+        $(panel.upload).click(function(){
+            self.readPanelAndUpload(panel);
+        });
+        $(panel.upload).click(function(){
+            self.readPanelAndPopupLinks(panel);
+        });
+
+        return panel;
+    },
+
+    //* reads the current information entered in the panel and uploads the information if it is valid
+    readPanelAndUpload:function(panel){
+        var concept = this.readPanel(panel);
+
+        var success = function(response){
+            taggyMessage("Concept "+response.uri+"saved","good-message");
+            panel.inputs.uri.inputType.fillInput(panel.inputs.uri.input,response.uri);
+        };
+        var error = function(request,status,error){
+            taggyMessage("Could not save concept: "+status,"bad-message");         
+        };
+
+        lot3backend.saveConcept(concept,success,error);
+    },
+
+    //* creates a popup to add links between concepts
+    readPanelAndPopupLinks:function(panel){
+        //TODO
+    },
+
+    readPanel:function(panel){
+        lastValueItem = panel.preferredTerm[0].lastValueItem;
+        var resultConcept = {
+            type: panel.type,
+            preferredTerm: lastValueItem.value,
+            uri:lastValueItem.valueItem.uri
+        };
+
+        if(resultConcept.uri == ""){
+            delete resultConcept.uri;
+        }
+
+        for(var name in panel.inputs){
+            var inputDiv = panel.inputs[name];
+            resultConcept[name]=inputDiv.inputType.readInput(inputDiv.input);
+        }
+
+        return resultConcept;
+    },
+
+    fillPanel:function(panel,values){
+        for(var name in panel.inputs){
+            var inputNode = panel.inputs[name];
+            inputNode.inputType.fillInput(inputNode.input,values[name]);
+        }
+    },
+
+    resetPanel:function(panel){
+        for(var name in panel.inputs){
+            var inputNode = panel.inputs[name];
+            inputNode.inputType.fillInput(inputNode.input,null);
+        }   
+    },
+
+    /**
+     ,* Creates the input fields required by the given template
+     ,*/
+    buildInputFields:function(container,resultFormat){
+        var inputs = {};
+        for(var name in resultFormat){
+            var inputType = resultFormat[name];
+            var inputNode = inputTypes.buildInput(inputType,name);
+            inputs[name] = inputNode;
+            $(container).append(inputNode);
+        }
+        return inputs;
+    },
+
+    handleConceptSearchResults:function(request,handler,data,type){
+        var elements = $.map( data, function( item ) {
+            var valueItem= {
+                label: item.preferredTerm,
+                value: item.preferredTerm,
+                valueItem: item
+            };
+            return valueItem;
+        });
+        var filteredElements = [];
+        for(var i=0, element; element=elements[i]; i++){
+            if(element.valueItem.type == type){
+                filteredElements.push(element);
+            }
+        }
+
+        elements=filteredElements;
+        if(request.term){
+            var useInputAsNew = {label:"&lt;&lt;new value: "+request.term+"&gt;&gt;",
+                                 value : request.term,
+                                 valueItem : {preferredTerm:request.term,
+                                              isNewConcept:true}};
+            elements.push(useInputAsNew);
+        }
+        handler(elements);  
+    }
+};
+
+var inputTypes = {
+    string : {
+        name : "string",
+        buildSpecificInput : function(name){
+            var temp = document.createElement("div");
+            temp.innerHTML = "&lt;input class='taggy-text' name='"+name+"'&gt;";
+            return temp.children[0];
+        },
+        readInput : function(input){
+            return $(input).val();
+        },
+        fillInput : function(input,value){
+            $(input).val(value?value:"");
+        }
+    },
+    array : {
+        name : "array",
+        buildSpecificInput : function(name){
+            var temp = document.createElement("div");
+            temp.innerHTML = "&lt;input class='taggy-array' name='"+name+"'&gt;";
+            return temp.children[0];
+        },
+        readInput : function(input){
+            var stringvalue= $(input).val();
+            var array =  stringvalue.split(",");
+            for (var i=0, element; element = array[i]; i++){
+                array[i] = element.trim();
+            }
+            return array;
+        },
+        fillInput : function(input,value){
+            $(input).val(value?value.join(","):"");
+        }
+    },
+    longText : {
+        name : "longText",
+        buildSpecificInput : function(name){
+            var temp = document.createElement("div");
+            temp.innerHTML = "&lt;textarea class='taggy-long-text' type='textarea' name='"+name+"'&gt;&lt;/textarea&gt;";
+            return temp.children[0];
+        },
+        readInput : function(input){
+            return $(input).val();
+        },
+        fillInput : function(input,value){
+            $(input).val(value?value:"");
+        }
+    },
+    uri : {
+        name : "uri",
+        buildSpecificInput : function(name){
+            var temp = document.createElement("div");
+            temp.innerHTML = "&lt;input class='taggy-text' disabled='true' name='"+name+"'&gt;";
+            return temp.children[0];
+        },
+        readInput : function(input){
+            return $(input).val();
+        },
+        fillInput : function(input,value){
+            $(input).val(value?value:"");
+        }
+    },
+    buildInput : function(inputType,name,args){
+        var placeHolder=document.createElement("div");
+        placeHolder.innerHTML="&lt;div class = 'input'&gt;&lt;span class='label'&gt;"+name+"&lt;/span&gt;&lt;/div&gt;";
+        var node = placeHolder.children[0];
+        var specific = inputType.buildSpecificInput(name,args);
+        $(node).append(specific);
+        node.inputType=inputType;
+        node.input= specific;
+        return node;
+    }
+};
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if(request.type == "initTaggy"){
+            Taggy.addInterface();
+            sendResponse({status:"ok"});
+        } else if(request.type == "getPageContent"){
+            var htmlNodes = document.getElementsByTagName("html");
+            sendResponse({html:htmlNodes[0].outerHTML});
+        }
+  });
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> Backend api</h3>
+<div class="outline-text-3" id="text-5-2">
+
+<p>The following calls interact with the backend api to fetch and store information in the backend. The backend api can be included on the contentscript side as scripts there are allowed to do cross-origin requests.
+</p>
+
+
+
+<pre class="example">var lot3backend = {
+    ToolsBackendURL:"http://localhost/lot3-tools/",  
+
+    //* activates the input as an autocomplete search box for concepts, returning only concepts of a type
+    setupSearch: function(input,type,panel,success,error,select){
+        var self=this;
+        var autoComplete = $(input).autocomplete({
+            appendTo: input.parentNode,
+            source: function( request, response ) {
+                ajax({
+                    type:"GET",
+                    url: self.ToolsBackendURL+"concepts/search",
+                    data: {
+                        term: request.term
+                    },
+                    success: $.proxy(success,this,type,request,response),
+                    error: error
+                });
+            },
+            delay:500,
+            minLength: 3,
+            select: function(event,ui){
+                input.lastValueItem = ui.item;
+                select(event,ui);
+            }
+        });
+        return autoComplete;        
+    },
+
+    //* stores the given concept in the backend
+    saveConcept:function(concept,success,error){
+        if(concept.uri){
+            // existing concept
+            var self = this;
+            ajax({
+                type:"PUT",
+                url: self.ToolsBackendURL+"concept",
+                data: concept,
+                success: success,
+                error: error
+            });
+        }else{
+            // new concept
+            var self = this;
+            ajax({
+                type:"POST",
+                url: self.ToolsBackendURL+"concepts",
+                data: concept,
+                success: success,
+                error: error
+            });
+
+        }
+    }
+}
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> style</h2>
+<div class="outline-text-2" id="text-6">
+
+<p>Some style would be nice&hellip;
+</p>
+
+
+
+<pre class="example">#message {
+    background:blue;
+}
+</pre>
+
+
+<p>
+There is also css injected into the web page:
+</p>
+
+
+
+<pre class="example">#taggyInterface {
+    height:100%;
+    z-index: 1000000;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 3px 0 0 0;
+    margin: 0;
+}
+#taggyInterface::-webkit-scrollbar {
+    display:none;
+
+}
+.taggy-tabs h2 {
+    text-align: left;
+}
+.taggy-tabs .input .label {
+    text-align: left;
+    display: block;
+}
+.taggy-tabs .input .label:after {
+    content: ":";
+}
+.taggy-tabs .input input, .taggy-tabs .input textarea {
+    display: block;
+    text-align: left;
+    width: 100%;
+}
+.taggy-tabs .input textarea {
+    min-height: 6em;
+}
+#taggyInterface &gt; div.controls {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+}
+#taggyInterface &gt; div.controls {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+}
+#taggyInterface &gt; h1 {
+    margin: 0.1em 0.1em;
+}
+#taggyInterface {
+    background-color: white;
+}
+#taggyInterface &gt; h1 {
+    background-color: lightgray;
+    border: darkgray solid 1px;
+    border-radius: 5px;
+}
+.taggyMessage {
+    transition-property: opacity;
+    transition-duration: 1s;
+    width:100%;
+    position:absolute;
+    opacity:0;
+    bottom: 0;
+    border-width: 5px 0 0 0;
+    padding: 1em 0;
+    height: 1em;
+    font-weight: bold;
+    font-style: italic;
+
+}
+.taggyMessage.good-message {
+    background: lightgreen;
+    border: solid darkgreen;
+    color: darkgreen;
+    border-width: 5px 0 0 0;
+}
+.taggyMessage.bad-message {
+    background: pink;
+    border: solid darkred;
+    color: darkred;
+    border-width: 5px 0 0 0;
+}
+.taggyMessage.taggyMessage-open {
+    opacity:1;
+}
+.taggyMessage.taggyMessage-close {
+    opacity:0 !important;
+}
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> Using the backend api</h2>
+<div class="outline-text-2" id="text-7">
+
+
+</div>
+
+<div id="outline-container-7-1" class="outline-3">
+<h3 id="sec-7-1"><span class="section-number-3">7.1</span> Format of search results</h3>
+<div class="outline-text-3" id="text-7-1">
+
+
+
+
+<pre class="example">definition: "&lt;p&gt;↵       foo&lt;/p&gt;↵&lt;ul&gt;↵   &lt;li&gt;↵           bar&lt;/li&gt;↵       &lt;li&gt;↵           baz&lt;/li&gt;↵       &lt;li&gt;↵           bonzo&lt;/li&gt;↵&lt;/ul&gt;↵&lt;p&gt;↵   bing!&lt;/p&gt;"
+name: ""
+nonPreferredTerms: [],
+preferredTerm: "test"
+type: "Occupation"
+uri: "http://www.tenforce.com/esco/lot3/concept/10"
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-2" class="outline-3">
+<h3 id="sec-7-2"><span class="section-number-3">7.2</span> </h3>
+<div class="outline-text-3" id="text-7-2">
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2014-08-23 17:41:23 CEST</p>
+<p class="author">Author: Karel Kremer</p>
+<p class="creator">Org version 7.8.03 with Emacs version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>

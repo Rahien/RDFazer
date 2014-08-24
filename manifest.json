@@ -1,0 +1,22 @@
+
+{
+  "name": "RDFazer",
+  "version": "0.1",
+  "manifest_version": 2,
+  "description": "Tag concepts on a page with RDFa",
+  "browser_action": {
+      "default_icon": "icon.png"
+  },
+    "content_scripts": [
+        {
+            "matches": ["http://*/*", "https://*/*"],
+            "css": ["contentscript.css","lib/jquery-ui.css"],
+            "js": ["lib/jquery-2.0.3.min.js","lib/jquery-ui-1.10.4.custom.min.js","lib/jquery.migrate.min.js","utils.js","backendApi.js","contentscript.js", "lib/rangy-core.js", "lib/rangy-classapplier.js","lib/rangy-highlighter.js"]
+        }
+    ],
+    "background": {
+        "scripts":["lib/jquery-2.0.3.min.js","background.js","utils.js"]
+    },
+    "permissions": ["tabs", "<all_urls>"],
+    "web_accessible_resources": ["lib/jquery-2.0.3.min.map","lib/jquery-2.0.3.js","contentscript.css","interface.html","dialog.html"]
+}

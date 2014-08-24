@@ -1,0 +1,128 @@
+
+div#rdfazerInterface {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    background: white;
+    border: solid black 2px;
+    z-index: 9999;
+    border-width: 0 0 0 2px;
+    overflow:hidden;
+}
+.ui-front {
+    z-index:10000;
+}
+div#rdfazerInterface.left {
+    top: 0;
+    left: 0;
+    right: auto;
+    border-width: 0 2px 0 0;
+}
+.rdfazerhead {
+    position:fixed;
+}
+.rdfazerhead button {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+}
+
+.rdfazerhead h1 {
+    position: relative;
+    /* Safari */ -webkit-transform: rotate(-90deg);  /* Firefox */ -moz-transform: rotate(-90deg);  /* IE */ -ms-transform: rotate(-90deg);  /* Opera */ -o-transform: rotate(-90deg);  /* Internet Explorer */ filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    top: 215px;
+    left: -35px;
+    font-style: italic;
+}
+.rdfazerhead {
+    float: left;
+    width: 4em;
+    height: 100%;
+}
+.rdfazerhead button {
+    position: relative;
+    right: auto;
+    height: 2em;
+    width: 2em;
+    left: 14px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    background-color: lightgray;
+    border-radius: 40px;
+    border: solid 0px gray;
+    outline: none;
+    top:-2.5em;
+    margin: 0.3em 0em;
+}
+.rdfazerhead button.switch {
+    background-color:lightyellow;
+}
+.rdfazerhead button.remove {
+    background-color:pink;
+}
+.rdfazerhead button.highlight {
+    background-color:lightblue;
+}
+.rdfazerhead button.open {
+    background-color:lightgreen;
+}
+.rdfazercontent {
+    margin-left: 4em;
+    width: 0px;
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    padding: 0 !important;
+    border: dashed 0px lightgray;
+    border-width: 0 0 0 1px;
+    position:relative;
+}
+  
+.left .rdfazercontent {
+    border-width: 0 1px 0 0;
+}
+.open .rdfazercontent {
+    width:350px;
+    padding: 0 0.3em !important;
+}
+.open.left .rdfazerhead {
+    left:345px;
+}
+.left .rdfazercontent {
+    margin-left: 0;
+    margin-right: 4em;
+}
+#rdfazerdialog input.text.ui-widget-content.ui-corner-all {
+    width: 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+body {
+    position:relative;
+}
+.left.open .rdfazerhead h1 {
+    left: -28px;
+}
+.left.open .rdfazerhead button {
+    left: 20px;
+}
+.highlightTag {
+    background-color: lightblue;
+    padding: 0 0.3em;
+    border: solid 1px lightseagreen;
+    border-radius: 5px;
+    margin-right: 0.3em;
+    display: inline-block;
+    position: absolute;
+}
+.highlight.hover {
+    background-color: lightblue;
+    padding: 0 0.3em;
+    border: solid 1px lightseagreen;
+    border-radius: 5px;
+}
