@@ -104,7 +104,7 @@ var Rdfazer = {
 
         conceptsDiv.append("<div about='"+localHighlightUri+"'><div rel='"+this.baseURI+"/highlightFor'></div></div>");
         
-        var relation = $("#rdfazerconcepts div[rel='"+this.baseURI+"/highlightFor']");
+        var relation = $("#rdfazerconcepts div[about='"+localHighlightUri+"'] div[rel='"+this.baseURI+"/highlightFor']");
 
         for(var i=0, uri; uri=uris[i]; i++){
             relation.append("<span about='"+uri+"'></span>");
@@ -155,6 +155,15 @@ var Rdfazer = {
                 self.currentRange = rangy.getSelection().getRangeAt(0);
                 dialog.dialog( "open" );
             });
+
+	    $("#rdfazerdialog input[name='href']").change(function(){
+		var url=$(this).val();
+		url = decodeURIComponent(url);
+		var uri = url.substring(url.lastIndexOf("http:"));
+		if(uri && uri.length>0){
+		    $("#rdfazerdialog input.uri").first().val(uri);		    
+		}
+	    });
 
             $("#rdfazerdialog button.adduri").click(function(){
                 $("#rdfazerdialog .uris").append('<input type="text" value="http://localhost/show-concept/1" class="uri text ui-widget-content ui-corner-all">');
