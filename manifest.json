@@ -9,7 +9,7 @@
   },
     "content_scripts": [
         {
-            "matches": ["http://*/*", "https://*/*"],
+            "matches": ["http://*/*", "https://*/*", "file://*/*"],
             "css": ["contentscript.css","lib/jquery-ui.css"],
             "js": ["lib/jquery-2.0.3.min.js","lib/jquery-ui-1.10.4.custom.min.js","lib/jquery.migrate.min.js","utils.js","backendApi.js","contentscript.js", "lib/rangy-core.js", "lib/rangy-classapplier.js","lib/rangy-highlighter.js"]
         }
