@@ -1,5 +1,6 @@
+
 div#rdfazerInterface {
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     height: 100%;
@@ -23,9 +24,9 @@ div#rdfazerInterface.left {
 }
 .rdfazerhead button {
     position: absolute;
+    display: block;
     top: 1em;
     right: 1em;
-    display: block;
 }
 
 .rdfazerhead h1 {
@@ -126,6 +127,52 @@ body {
     border: solid 1px lightseagreen;
     border-radius: 5px;
 }
-.highlight[title='unknown'], .highlight.unknown {
+
+.rdfazer-dialog-tabs {
+    border: none;
+}
+div#rdfazerdialog {
+    padding: 0;
+}
+#rdfazerdialog div.rdfazer-dialog-tabs > div {
+    padding: 1em 0;
+}
+
+.rdfazer-searchresult {
+    border: solid 1px lightblue;
+    background-color: aliceblue;
+    padding: 0.3em;
+    border-radius: 0.3em;
+    margin: 0.5em 0;
+}
+.rdfazer-searchresult .searchresult-body.hidden {
+    display:none;
+}
+
+.rdfazer-searchresult-head input[type="checkbox"] {
+    height: 1em;
+    position: absolute;
+    width: 1em;
+    right: 0px;
+    margin: 0;
+}
+.rdfazer-searchresult-head {
+    position: relative;
+}
+.searchresult-body {
+    border: solid lightblue;
+    border-width: 1px 0 0 0;
+}
+.searchresult-body div {
+    margin: 0.3em 0;
+}
+.searchresult-body span:first-child {
+    font-weight: bold;
+    margin-right: 0.3em;
+}
+#rdfazerdialog input.text.ui-widget-content.ui-corner-all {
+    padding-left: 0.3em;
+}
+highlight[title='unknown'], .highlight.unknown {
     color:red;
 }

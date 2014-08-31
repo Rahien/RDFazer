@@ -127,22 +127,16 @@ var Rdfazer = {
 
     addDialog:function(){
         var self=this;
-        $("body").append("<div id='rdfazerdialog' title='Add new highlight'></div>");
+	$("body").append("<div id='rdfazerdialog' title='Add new highlight'></div>");
+
         $('#rdfazerdialog').load(chrome.extension.getURL("dialog.html"),function(){
-            var dialog = $( "#rdfazerdialog" ).dialog({
+	    $(".rdfazer-dialog-tabs").tabs();
+
+	    var dialog = $( "#rdfazerdialog" ).dialog({
                 autoOpen: false,
-                height: 320,
-                width: 450,
+                height: 500,
+                width: 720,
                 modal: true,
-                buttons: {
-                    "highlight": function(){
-                        self.readAndAddHighlight();
-                        dialog.dialog( "close" );
-                    },
-                    Cancel: function() {
-                        dialog.dialog( "close" );
-                    }
-                },
                 close: function() {
                     var uriInputs = $("#rdfazerdialog input.uri");
                     for(var i=1, uri; uri=uriInputs[i];i++){
@@ -153,8 +147,23 @@ var Rdfazer = {
             
             $(".rdfazerhead button.highlight").click(function(){
                 self.currentRange = rangy.getSelection().getRangeAt(0);
+		$("#rdfazer-search input").val(self.currentRange.toString());
+		if($("#rdfazer-search").attr("aria-expanded")=="true"){
+		    setTimeout(function(){
+			$("#rdfazer-search input").focus();
+		    },100);
+		}else{
+		    setTimeout(function(){
+			$("#rdfazer-manual input[name='label']").focus();
+		    },100);
+		}
                 dialog.dialog( "open" );
             });
+	    
+	    $("#rdfazerdialog button.highlight").click(function(){
+                self.readAndAddHighlight();
+                dialog.dialog( "close" );
+	    });
 
 	    $("#rdfazerdialog input[name='href']").change(function(){
 		var url=$(this).val();
@@ -171,6 +180,8 @@ var Rdfazer = {
             $("#rdfazerdialog button.removeuri").click(function(){
                 $("#rdfazerdialog .uris").children().last().remove();
             });
+
+	    self.setupSearch(dialog);
         });
     },
 
@@ -211,6 +222,108 @@ var Rdfazer = {
             content.append(tag);
         }
 
+    },
+
+    setupSearch:function(dialog){
+	var self = this;
+	var search= $("#rdfazer-search .buttons input").keypress(function(e){
+	    if(e.which==13){
+		self.doSearch($(this).val());
+	    }
+	});
+
+	$("#rdfazer-search button.highlight-searches").click(function(){
+	    self.highlightAcceptedSearches();
+            dialog.dialog( "close" );
+	});
+    },
+
+    highlightAcceptedSearches:function(){
+	var checked=$("#rdfazer-search .search-results input:checked");
+	var label;
+	var uris=[];
+	var url;
+	for( var i=0, input; input=checked[i];i++){
+	    var resultDiv= input.parentNode.parentNode;
+	    var result=resultDiv.searchResult;
+	    label= resultDiv.searchResult[resultDiv.searchResultLabel].value;
+	    var uri = result.target.value;
+	    url= this.config.uriToUrl(uri);
+	    uris.push(uri);		
+	}
+	this.addHighlightToSelection(label,url,uris);
+    },
+
+    doSearch:function(searchTerm){
+	var query = "";
+	var self = this;
+	query = this.config.query.replace("$searchTerm",searchTerm,"g");
+	this.sparqlQuery(query, function(data){
+	    self.showResults(data.head.vars,data.results.bindings);
+	},function(){
+	    self.message("error","Could not query the server for matching terms");
+	});
+    },
+
+    showResults:function(vars,bindings){
+	$("#rdfazer-search .search-results").empty();
+	for(var i = 0, binding; binding = bindings [i]; i++){
+	    var container = $('<div class="rdfazer-searchresult">'+
+			      '<div class="rdfazer-searchresult-head">'+
+			      '<span class="toggle">+</span><span class="rdfazer-hcontent"></span><input type="checkbox"></input></div>' +
+			      '<div class="searchresult-body hidden"></div>' + 
+			      '</div>');
+	    var useAsLabel;
+	    if(vars.length>1){
+		useAsLabel=vars[1];
+	    }else{
+		useAsLabel=vars[0];
+	    }
+	    container.find(".rdfazer-hcontent").html(binding[useAsLabel].value);
+	    var details = ""
+
+	    for(var j = 0, varname; varname = vars [j]; j++){
+		details += "<div><span>"+varname+":</span><span>"+binding[varname].value+"</span></div>"
+	    }    
+	    container.find(".toggle").click(function(){
+		$(this).parent().parent().find(".searchresult-body").toggleClass("hidden");
+	    });
+	    container.find(".searchresult-body").append(details);
+	    $("#rdfazer-search .search-results").append(container);	    
+
+	    container[0].searchResult = binding;
+	    container[0].searchResultLabel = useAsLabel;
+	}
+    },
+
+    message:function(type,message){
+	alert(type+": "+message);
+    },
+
+    sparqlQuery:function(query,success,error){
+	/* for the interested reader that would like to know why the headers are a mess:
+	   virtuoso. */
+	$.ajax({
+	    headers: { 
+		Accept : "application/sparql-results+json,application/json,text/html,application/xhtml+xml,application/xml; charset=utf-8",
+		"Content-Type": "text/plain; charset=utf-8"
+	    },
+	    url:this.config.sparql,
+	    data:{
+		query:query,
+		format:"application/sparql-results+json"
+	    },
+	    success:success,
+	    error:error
+	});
+    },
+
+    config: {
+	sparql:"http://localhost:8890/sparql",
+	query: "select ?target (group_concat(distinct(?labels),\", \") as ?label) (group_concat(distinct(?types), \", \") as ?type) where { { ?target a <http://ec.europa.eu/esco/model#Occupation> . } UNION { ?target a <http://ec.europa.eu/esco/model#Skill> . } ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels . ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. ?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label0 . FILTER (bif:contains(?label0,\"'$searchTerm*'\")) . FILTER (lang(?label0) = \"en\") . } UNION { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2. ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label1 . FILTER (bif:contains(?label1,\"'$searchTerm*'\")) . FILTER (lang(?label1)= \"en\") . } FILTER (lang (?labels) = \"en\") } GROUP BY ?target",
+	uriToUrl:function(uri){
+	    return "https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/"+uri;
+	}
     }
 };
 
