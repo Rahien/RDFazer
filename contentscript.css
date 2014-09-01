@@ -173,6 +173,6 @@ div#rdfazerdialog {
 #rdfazerdialog input.text.ui-widget-content.ui-corner-all {
     padding-left: 0.3em;
 }
-highlight[title='unknown'], .highlight.unknown {
+a.highlight[title='unknown'], a.highlight.unknown {
     color:red;
 }
