@@ -1,13 +1,10 @@
 
 div#rdfazerInterface {
-    position: fixed;
+    position: absolute;
     top: 0;
     right: 0;
     height: 100%;
     background: white;
-    border: solid black 2px;
-    z-index: 9999;
-    border-width: 0 0 0 2px;
     overflow:hidden;
 }
 .ui-front {
@@ -43,6 +40,12 @@ div#rdfazerInterface.left {
     float: left;
     width: 4em;
     height: 100%;
+    border: solid black 2px;
+    z-index: 9999;
+    border-width: 0 1px 0 2px;
+    border-style: solid dashed solid solid;
+    border-color: black lightgray black black;
+    background-color: white;
 }
 .rdfazerhead button {
     position: relative;
@@ -82,6 +85,7 @@ div#rdfazerInterface.left {
     border: dashed 0px lightgray;
     border-width: 0 0 0 1px;
     position:relative;
+    text-align:left;
 }
   
 .left .rdfazercontent {

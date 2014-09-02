@@ -198,6 +198,8 @@ var Rdfazer = {
         content.empty();
         
         var highlights = $(".highlight[about]");
+	// keep track of where the highlights are and do not overlap
+	var highlightSpots = [];
         
         for(var i=0, highlight; highlight=highlights[i]; i++){
             var node = $(highlight);
@@ -207,21 +209,41 @@ var Rdfazer = {
             for(var j=0, uri; uri=urinodes[j]; j++){
                 uris.push($(uri).attr("about"));
             }
-            var offset = node.offset();
-            var tag=$("<a class='highlightTag' highlight= '"+highlightURI+"' href='"+node.attr("href")+"'>"+uris.join(", ")+"</div>");
-            tag.css({ top: offset.top+"px" });
-
-            tag.hover(function(){
-                var highlightURI=$(this).attr("highlight");
-                $(".highlight[about='"+highlightURI+"']").addClass("hover");
-            },function(){
-                var highlightURI=$(this).attr("highlight");
-                $(".highlight[about='"+highlightURI+"']").removeClass("hover");
-            });
-
-            content.append(tag);
+	    var tag=this.buildHighlightTag(content,node,uris,highlightURI,highlightSpots);          
         }
 
+    },
+
+    buildHighlightTag:function(content,node,uris,highlightURI,highlightSpots){
+	var tag=$("<a class='highlightTag' highlight= '"+highlightURI+"' href='"+node.attr("href")+"'>"+uris.join(", ")+"</a>");
+
+	var top = node.offset().top;
+	var takenSpot = null;
+	while(takenSpot = this.highlightSpotTaken(highlightSpots,top)){
+	    top = takenSpot.top + takenSpot.height + 3;
+	}
+
+        tag.css({ top: top+"px" });
+
+	tag.hover(function(){
+            var highlightURI=$(this).attr("highlight");
+            $(".highlight[about='"+highlightURI+"']").addClass("hover");
+        },function(){
+            var highlightURI=$(this).attr("highlight");
+            $(".highlight[about='"+highlightURI+"']").removeClass("hover");
+        });
+
+        content.append(tag);
+	highlightSpots.push({top:top, height:tag.height()});
+    },
+    // really inefficient, but there should not be that many highlights, right...
+    highlightSpotTaken:function(highlightSpots,top){
+	for(var i = 0, spot; spot = highlightSpots[i]; i++){
+	    if(spot.top<= top && spot.height>= top-spot.top){
+		return spot;
+	    }
+	}
+	return false;
     },
 
     setupSearch:function(dialog){
@@ -255,7 +277,9 @@ var Rdfazer = {
 	    url= this.config.uriToUrl(uri);
 	    uris.push(uri);		
 	}
-	this.addHighlightToSelection(label,url,uris);
+	if(uris.length>0){
+	    this.addHighlightToSelection(label,url,uris);
+	}
     },
 
     doSearch:function(searchTerm){
