@@ -5,7 +5,6 @@ RDFazer is a chrome browser plugin for tagging a website with RDFa concepts. It 
 
 This code was written based on the nice input from:
 - the tutorial provided by google :: e.g. https://developer.chrome.com/extensions/getstarted
-- stackoverflow :: e.g. http://stackoverflow.com/questions/11684454/getting-the-source-html-of-the-current-page-from-chrome-extension
                    
 This code makes heavy use of the [[https://github.com/timdown/rangy][rangy]] library, jquery and jquery ui.
 

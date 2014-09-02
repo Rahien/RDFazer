@@ -236,6 +236,10 @@ var Rdfazer = {
 	    self.highlightAcceptedSearches();
             dialog.dialog( "close" );
 	});
+	$("#rdfazer-search button.clear-searches").click(function(){
+	    self.clearResults(true);
+	});
+
     },
 
     highlightAcceptedSearches:function(){
@@ -265,8 +269,20 @@ var Rdfazer = {
 	});
     },
 
+    clearResults:function(all){
+	if(all){
+	    $("#rdfazer-search .search-results").empty();
+	    return;
+	}else{
+	    var unchecked=$("#rdfazer-search .search-results input:checkbox:not(:checked)");
+	    for(var i = 0, check; check = unchecked[i]; i++){
+		$(check.parentNode.parentNode).remove();
+	    }
+	}
+    },
+
     showResults:function(vars,bindings){
-	$("#rdfazer-search .search-results").empty();
+	this.clearResults();
 	for(var i = 0, binding; binding = bindings [i]; i++){
 	    var container = $('<div class="rdfazer-searchresult">'+
 			      '<div class="rdfazer-searchresult-head">'+
