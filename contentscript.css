@@ -142,35 +142,35 @@ div#rdfazerdialog {
     padding: 1em 0;
 }
 
-.rdfazer-searchresult {
+#rdfazerdialog .rdfazer-searchresult {
     border: solid 1px lightblue;
     background-color: aliceblue;
     padding: 0.3em;
     border-radius: 0.3em;
     margin: 0.5em 0;
 }
-.rdfazer-searchresult .searchresult-body.hidden {
+#rdfazerdialog .rdfazer-searchresult .searchresult-body.hidden {
     display:none;
 }
 
-.rdfazer-searchresult-head input[type="checkbox"] {
+#rdfazerdialog .rdfazer-searchresult-head input[type="checkbox"] {
     height: 1em;
     position: absolute;
     width: 1em;
     right: 0px;
     margin: 0;
 }
-.rdfazer-searchresult-head {
+#rdfazerdialog .rdfazer-searchresult-head {
     position: relative;
 }
-.searchresult-body {
+#rdfazerdialog .searchresult-body {
     border: solid lightblue;
     border-width: 1px 0 0 0;
 }
-.searchresult-body div {
+#rdfazerdialog .searchresult-body div {
     margin: 0.3em 0;
 }
-.searchresult-body span:first-child {
+#rdfazerdialog .searchresult-body span:first-child {
     font-weight: bold;
     margin-right: 0.3em;
 }
@@ -179,4 +179,98 @@ div#rdfazerdialog {
 }
 a.highlight[title='unknown'], a.highlight.unknown {
     color:red;
+}
+
+
+.rdfazerdialogwrap .rdfazer-dialog-tabs.ui-tabs.ui-widget.ui-widget-content.ui-corner-all {
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+}
+.rdfazerdialogwrap .ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix {
+    border: none;
+    border-radius: 0;
+    text-align: right;
+}
+
+.rdfazerdialogwrap .ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix {
+    position: absolute;
+    top: 0.3em;
+    right: 0.3em;
+    width: 50%;
+    z-index: 200;
+    background: none;
+}
+
+
+.rdfazerdialogwrap .rdfazer-dialog-tabs.ui-tabs.ui-widget.ui-widget-content.ui-corner-all {
+    padding-bottom: 50px;
+}
+#rdfazerdialog .search-results-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    padding-top: 115px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+#rdfazerdialog .search-results {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+#rdfazerdialog .search-results-wrap > label {
+    position: absolute;
+}
+#rdfazerdialog div.searchbuttons {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+}
+#rdfazerdialog .search-container {
+    height: 100%;
+    position: relative;
+    overflow: auto;
+}
+#rdfazerdialog .buttons {
+    z-index: 100;
+    position: relative;
+}
+#rdfazerdialog .ui-tabs .ui-tabs-nav {
+    position: relative;
+    z-index: 100;
+}
+#rdfazerdialog .searchloading {
+    position: absolute;
+    right: 0.1em;
+    width: 2em;
+    height: 2em;
+    background-image: url("lib/images/loading.gif");
+    margin-right: 0.1em;
+    background-size: 100% 100%;
+}
+div#rdfazer-manual {
+    position: absolute;
+    height: 100%;
+    padding-top: 50px !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+#rdfazerdialog .manual-wrap {
+    height: 100%;
+    position: relative;
+    overflow: auto;
 }

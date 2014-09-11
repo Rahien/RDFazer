@@ -12,7 +12,6 @@ RDFazer is currently a WIP and should not be used at all.
 
 
 * TODO
-- [ ] Use popup for better rendering
 - [ ] Add paging
 - [X] Allow search through SPARQL endpoint
 - [ ] Add settings panel

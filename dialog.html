@@ -10,26 +10,30 @@
     </div>
     <div class="search-results-wrap">
       <label>Results:</label>
+      <div class="searchloading hidden"></div>
       <div class="search-results">
+	<div class="search-container"></div>
       </div>
-      <button class="highlight-searches">highlight</button>
-      <button class="clear-searches">clear</button>
+      <div class="searchbuttons"><button class="highlight-searches">highlight</button>
+      <button class="clear-searches">clear</button></div>
     </div>
   </div>
   <div id="rdfazer-manual">
-    <label for="label">Title</label>
-    <input type="text" name="label" value="concept" class="text ui-widget-content ui-corner-all">
-    <label for="href">URL</label>
-    <input type="text" name="href" value="http://localhost/show-concept/1" class="text ui-widget-content ui-corner-all">
-    
-    <label for="uri">URIs</label>
-    <div class="uris">
-      <input type="text" value="http://localhost/show-concept/1" class="uri text ui-widget-content ui-corner-all">
+    <div class="manual-wrap">
+      <label for="label">Title</label>
+      <input type="text" name="label" value="concept" class="text ui-widget-content ui-corner-all">
+      <label for="href">URL</label>
+      <input type="text" name="href" value="http://localhost/show-concept/1" class="text ui-widget-content ui-corner-all">
+      
+      <label for="uri">URIs</label>
+      <div class="uris">
+	<input type="text" value="http://localhost/show-concept/1" class="uri text ui-widget-content ui-corner-all">
+      </div>
+      <div class="buttons">
+	<button class="adduri">+</button>
+	<button class="removeuri">-</button>
+      </div>
+      <button class="highlight">Highlight</button>
     </div>
-    <div class="buttons">
-      <button class="adduri">+</button>
-      <button class="removeuri">-</button>
-    </div>
-    <button class="highlight">Highlight</button>
   </div>
 </div>

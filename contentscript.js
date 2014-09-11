@@ -137,6 +137,7 @@ var Rdfazer = {
                 height: 500,
                 width: 720,
                 modal: true,
+		dialogClass: "rdfazerdialogwrap",
                 close: function() {
                     var uriInputs = $("#rdfazerdialog input.uri");
                     for(var i=1, uri; uri=uriInputs[i];i++){
@@ -186,11 +187,15 @@ var Rdfazer = {
     },
 
     addCss:function(){
-        var link = document.createElement("link");
-        link.href = chrome.extension.getURL("contentscript.css");
-        link.type = "text/css";
-        link.rel = "stylesheet";
-        document.getElementsByTagName("head")[0].appendChild(link);
+        var css = document.createElement("link");
+        css.href = chrome.extension.getURL("contentscript.css");
+        css.type = "text/css";
+        css.rel = "stylesheet";
+	var jqueryUI = document.createElement("link");
+	jqueryUI.href = chrome.extension.getURL("lib/jquery-ui.css");
+        jqueryUI.type = "text/css";
+        jqueryUI.rel = "stylesheet";
+        document.getElementsByTagName("head")[0].appendChild(css).appendChild(jqueryUI);
     },
     
     showHighlights:function(){
@@ -286,19 +291,26 @@ var Rdfazer = {
 	var query = "";
 	var self = this;
 	query = this.config.query.replace("$searchTerm",searchTerm,"g");
+	this.toggleLoading();
 	this.sparqlQuery(query, function(data){
 	    self.showResults(data.head.vars,data.results.bindings);
+	    self.toggleLoading();
 	},function(){
 	    self.message("error","Could not query the server for matching terms");
+	    self.toggleLoading();
 	});
+    },
+    
+    toggleLoading:function(){
+	$("#rdfazerdialog .searchloading").toggleClass("hidden");
     },
 
     clearResults:function(all){
 	if(all){
-	    $("#rdfazer-search .search-results").empty();
+	    $("#rdfazer-search .search-container").empty();
 	    return;
 	}else{
-	    var unchecked=$("#rdfazer-search .search-results input:checkbox:not(:checked)");
+	    var unchecked=$("#rdfazer-search .search-container input:checkbox:not(:checked)");
 	    for(var i = 0, check; check = unchecked[i]; i++){
 		$(check.parentNode.parentNode).remove();
 	    }
@@ -313,23 +325,28 @@ var Rdfazer = {
 			      '<span class="toggle">+</span><span class="rdfazer-hcontent"></span><input type="checkbox"></input></div>' +
 			      '<div class="searchresult-body hidden"></div>' + 
 			      '</div>');
-	    var useAsLabel;
-	    if(vars.length>1){
-		useAsLabel=vars[1];
-	    }else{
-		useAsLabel=vars[0];
-	    }
+	    var useAsLabel=$.inArray("label",vars)?"label":vars[0];
+
 	    container.find(".rdfazer-hcontent").html(binding[useAsLabel].value);
 	    var details = ""
 
 	    for(var j = 0, varname; varname = vars [j]; j++){
 		details += "<div><span>"+varname+":</span><span>"+binding[varname].value+"</span></div>"
 	    }    
-	    container.find(".toggle").click(function(){
+	    container.find(".toggle").click(function(event){
 		$(this).parent().parent().find(".searchresult-body").toggleClass("hidden");
+		event.stopPropagation();
 	    });
+	    container.find(".rdfazer-searchresult-head").click(function(){
+		var checkbox=$($(this).parent()).find("input");
+		checkbox.prop("checked", !checkbox.prop("checked"));
+	    });
+	    container.find("input").click(function(event){
+		event.stopPropagation();
+	    });
+	    
 	    container.find(".searchresult-body").append(details);
-	    $("#rdfazer-search .search-results").append(container);	    
+	    $("#rdfazer-search .search-container").append(container);	    
 
 	    container[0].searchResult = binding;
 	    container[0].searchResultLabel = useAsLabel;
