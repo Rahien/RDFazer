@@ -1,4 +1,3 @@
-
 function sendMessage (messagePayload, messageHandler){
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         chrome.tabs.sendMessage(tabs[0].id, messagePayload, messageHandler);
@@ -29,7 +28,13 @@ var Rdfazer = {
     baseURI:"http://localhost",
     //* stores the current HTML page in the rdfazer component for storing it as a source when needed. TODO use and store the HTML
     storeCurrentHTML: function() {
+	this.destroy();
         this.currentHTML = document.getElementsByTagName("html")[0].outerHTML;
+
+	var locallink = document.createElement('a');
+	locallink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(this.currentHTML));
+	locallink.setAttribute('download', 'rdfazer.html');
+	locallink.click();
     },
     
     init: function(){
@@ -56,6 +61,9 @@ var Rdfazer = {
             });
             $(".rdfazerhead button.remove").click(function(){
                 self.destroy();
+            });
+            $(".rdfazerhead button.save").click(function(){
+                self.storeCurrentHTML();
             });
             self.addDialog();
             self.showHighlights();

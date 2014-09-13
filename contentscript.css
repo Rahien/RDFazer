@@ -90,6 +90,9 @@ div#rdfazerInterface.left {
 .rdfazerhead button.open {
     background-image:url("/lib/images/open.png");
 }
+.rdfazerhead button.save {
+    background-image:url("/lib/images/save.png");
+}
 .rdfazerhead button.settings {
     background-image:url("/lib/images/settings.png");
 }
