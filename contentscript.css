@@ -6,9 +6,12 @@ div#rdfazerInterface {
     height: 100%;
     background: white;
     overflow:hidden;
+    z-index:1000;
+    text-align:left;
+    font-size:12px !important;
 }
 .ui-front {
-    z-index:10000;
+    z-index:10000 !important;
 }
 div#rdfazerInterface.left {
     top: 0;
@@ -22,19 +25,19 @@ div#rdfazerInterface.left {
 .rdfazerhead button {
     position: absolute;
     display: block;
-    top: 1em;
-    right: 1em;
 }
 
 .rdfazerhead h1 {
-    position: relative;
+    position: absolute;
     /* Safari */ -webkit-transform: rotate(-90deg);  /* Firefox */ -moz-transform: rotate(-90deg);  /* IE */ -ms-transform: rotate(-90deg);  /* Opera */ -o-transform: rotate(-90deg);  /* Internet Explorer */ filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
     margin: 0;
     padding: 0;
     display: inline-block;
-    top: 215px;
+    bottom: 64px;
     left: -35px;
     font-style: italic;
+    font-size: 30px;
+    color:#333;
 }
 .rdfazerhead {
     float: left;
@@ -46,33 +49,49 @@ div#rdfazerInterface.left {
     border-style: solid dashed solid solid;
     border-color: black lightgray black black;
     background-color: white;
+    font-size:12px;
+    right:0px;
+    text-align:left;
+}
+.left .rdfazerhead {
+    border-width: 0 2px 0 1px;
+    border-style: solid solid solid dashed;
+    border-color: black black black lightgray;
+}
+.left .rdfazerhead, .open .rdfazerhead {
+    right:auto;
 }
 .rdfazerhead button {
     position: relative;
     right: auto;
-    height: 2em;
-    width: 2em;
-    left: 14px;
+    height: 29px;
+    width: 29px;
+    left: 10px;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     background-color: lightgray;
     border-radius: 40px;
     border: solid 0px gray;
     outline: none;
-    top:-2.5em;
-    margin: 0.3em 0em;
+    margin: 4px 0 !important;
+    margin-left: 0 !important;
+    cursor: hand;
+    cursor: pointer;
 }
 .rdfazerhead button.switch {
-    background-color:lightyellow;
+    background-image:url("/lib/images/switch.png");
 }
 .rdfazerhead button.remove {
-    background-color:pink;
+    background-image:url("/lib/images/close.png");
 }
 .rdfazerhead button.highlight {
-    background-color:lightblue;
+    background-image:url("/lib/images/highlight.png");
 }
 .rdfazerhead button.open {
-    background-color:lightgreen;
+    background-image:url("/lib/images/open.png");
+}
+.rdfazerhead button.settings {
+    background-image:url("/lib/images/settings.png");
 }
 .rdfazercontent {
     margin-left: 4em;
@@ -82,10 +101,10 @@ div#rdfazerInterface.left {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     padding: 0 !important;
-    border: dashed 0px lightgray;
-    border-width: 0 0 0 1px;
     position:relative;
     text-align:left;
+    background-color: white;
+    z-index: 100;
 }
   
 .left .rdfazercontent {
@@ -108,13 +127,10 @@ div#rdfazerInterface.left {
     -moz-box-sizing: border-box;
 }
 body {
+    position:initial;
+}
+html {
     position:relative;
-}
-.left.open .rdfazerhead h1 {
-    left: -28px;
-}
-.left.open .rdfazerhead button {
-    left: 20px;
 }
 .highlightTag {
     background-color: lightblue;
@@ -149,8 +165,8 @@ div#rdfazerdialog {
     border-radius: 0.3em;
     margin: 0.5em 0;
 }
-#rdfazerdialog .rdfazer-searchresult .searchresult-body.hidden {
-    display:none;
+#rdfazerdialog .hidden, #rdfazerInterface .hidden {
+    display:none !important;
 }
 
 #rdfazerdialog .rdfazer-searchresult-head input[type="checkbox"] {
@@ -187,11 +203,16 @@ a.highlight[title='unknown'], a.highlight.unknown {
     box-sizing: border-box;
     padding: 0;
     border: 0;
+    z-index:100001;
 }
 .rdfazerdialogwrap .ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix {
     border: none;
     border-radius: 0;
     text-align: right;
+}
+div.rdfazerdialogwrap {
+    text-align:left !important;
+    font-size:16px !important;
 }
 
 .rdfazerdialogwrap .ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix {
@@ -199,7 +220,7 @@ a.highlight[title='unknown'], a.highlight.unknown {
     top: 0.3em;
     right: 0.3em;
     width: 50%;
-    z-index: 200;
+    z-index: 100002;
     background: none;
 }
 
