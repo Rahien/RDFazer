@@ -328,3 +328,10 @@ div#rdfazer-manual {
 .rdfazermessage.fade {
     opacity: 0;
 }
+
+#rdfazer-settings .input > * {
+    display: block; width: 100%; 
+}
+#rdfazer-settings .input > input {
+    padding: 0 0.3em;
+}

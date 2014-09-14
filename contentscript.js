@@ -20,7 +20,6 @@ var Rdfazer = {
     
     init: function(){
         var rdfazerIF = $("#rdfazerInterface")[0];
-	this.loadConfig();
         if(rdfazerIF){
             return rdfazerIF;
         }else{
@@ -28,6 +27,7 @@ var Rdfazer = {
 
             this.addCss();
             this.addInterface();
+	    this.addSettings();
         }
     },
     addInterface: function(){
@@ -50,6 +50,50 @@ var Rdfazer = {
             self.addDialog();
             self.showHighlights();
         });
+    },
+
+    addSettings:function(){
+	var self = this;
+	this.loadConfig(function(){
+	    $("body").append("<div id='rdfazer-settings' title='Settings'></div>");
+	    var settings = $("#rdfazer-settings");
+	    var dialog = settings.load(chrome.extension.getURL("settings.html"),function(){
+		settings.dialog({
+                    autoOpen: false,
+                    height: 500,
+                    width: 720,
+                    modal: true,
+		    dialogClass: "rdfazersettingswrap"
+		});
+
+		$(".rdfazerhead button.settings").click(function(){
+			dialog.dialog( "open" );
+		});		
+
+		$("#rdfazer-settings button.rdfazer-new-config").click(function(){
+		    self.message("error","not implemented yet");
+		});
+
+		self.fillSettings();
+		
+		$("#rdfazer-settings button.rdfazer-save-config").click(function(){
+		    self.config.sparql = $("#rdfazer-settings input[name='sparql']").val();
+		    self.config.profile = $("#rdfazer-settings select.rdfazer-configs").val();
+		    self.saveConfig(self.config);
+		    dialog.dialog('close');
+		});
+
+	    });
+	});
+    },
+
+    fillSettings:function(){
+	var profileSelect = $("#rdfazer-settings select.rdfazer-configs");
+	for(var profile in this.config.profiles){
+	    profileSelect.append("<option value='"+profile+"'"+(this.config.profile == profile?" selected":"")+">"+profile+"</profile>");
+	}
+	
+	$("#rdfazer-settings input[name='sparql']").val(this.config.sparql);
     },
 
     destroy:function(){
@@ -388,11 +432,11 @@ var Rdfazer = {
         });
     },
 
-    loadConfig:function(){
+    loadConfig:function(callback){
 	var self = this;
 	chrome.storage.local.get(null,function(config) {
-	    $.merge(self.config,config)
-            self.message('Info','Settings loaded');
+	    $.extend(self.config,config)
+	    callback();
         });
     },
 
@@ -408,19 +452,32 @@ var Rdfazer = {
     config: {
 	sparql:"http://localhost:8890/sparql",
 	profile:"esco",
-	labelProperty:"label",
 	profiles: {
 	    esco: {
 		query: "select ?target ?label (group_concat(distinct(?labels),\"; \") as ?altLabels) (group_concat(distinct(?types), \"; \") as ?types) where { { ?target a <http://ec.europa.eu/esco/model#Occupation> . } UNION { ?target a <http://ec.europa.eu/esco/model#Skill> . } ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label . ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. ?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . FILTER (lang(?plabels) = \"en\") . } UNION { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2. ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . FILTER (lang(?plabels)= \"en\") . } OPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels. FILTER (lang (?labels) = \"en\") }FILTER (lang (?label) = \"en\") } GROUP BY ?target ?label",
 		uriToUrl:function(uri){
 		    return "https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/"+uri;
 		},
+		labelProperty:"label",
 		storedInfo: {
-		    label: {store:"<meta property='http://www.w3.org/2008/05/skos-xl#prefLabel' content='$label'>"},
-		    altLabels: {store:"<meta property='http://www.w3.org/2008/05/skos-xl#altLabel' content='$altLabels'>", csv:";"},
+		    label: {store:"<meta property='http://www.w3.org/2004/02/skos/core#prefLabel' content='$label'>"},
+		    altLabels: {store:"<meta property='http://www.w3.org/2004/02/skos/core#altLabel' content='$altLabels'>", csv:";"},
+		    types: {store:"<div rel='http://www.w3.org/1999/02/22-rdf-syntax-ns#type'><span about='$types'></span></div>", csv:";"}
+		}
+	    },
+	    "default": {
+		query: "select ?target ?label (group_concat(distinct(?labels),\"; \") as ?altLabels) (group_concat(distinct(?types), \"; \") as ?types) where { ?target <http://www.w3.org/2004/02/skos/core##prefLabel> ?label . ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .{ ?target <http://www.w3.org/2004/02/skos/core#prefLabel> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . } UNION { ?target <http://www.w3.org/2004/02/skos/core#altLabel> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . } OPTIONAL {?target <http://www.w3.org/2004/02/skos/core#altLabel> ?labels. FILTER (lang (?labels) = \"en\") }FILTER (lang (?label) = \"en\") } GROUP BY ?target ?label",
+		uriToUrl:function(uri){
+		    return uri;
+		},
+		labelProperty:"label",
+		storedInfo: {
+		    label: {store:"<meta property='http://www.w3.org/2004/02/skos/core#prefLabel' content='$label'>"},
+		    altLabels: {store:"<meta property='http://www.w3.org/2004/02/skos/core#altLabel' content='$altLabels'>", csv:";"},
 		    types: {store:"<div rel='http://www.w3.org/1999/02/22-rdf-syntax-ns#type'><span about='$types'></span></div>", csv:";"}
 		}
 	    }
+
 	}
     }
 };
