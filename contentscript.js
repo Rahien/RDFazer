@@ -3,25 +3,6 @@ function sendMessage (messagePayload, messageHandler){
         chrome.tabs.sendMessage(tabs[0].id, messagePayload, messageHandler);
     });
 }
-function handleServerError(request,status,error,stage){
-    var message = "An error occurred during " + stage+".\n"+
-        "The server responded with status code '"+status+"' and the error message was:\n'"+error+"'";
-    rdfazerMessage(message,"bad-message");
-}
-
-function rdfazerMessage(message,classes){
-    var body=document.getElementsByTagName("body");
-    var messageDiv=document.createElement("div");
-    $(messageDiv).addClass(classes+" rdfazerMessage").text(message);
-    setTimeout(function(){
-        $(messageDiv).addClass(classes+" rdfazerMessage-close")       
-        setTimeout(function(){$(messageDiv).remove()},3000);
-    },1500);
-    $(body[0]).append(messageDiv);
-    setTimeout(function(){
-        $(messageDiv).addClass("rdfazerMessage-open");
-    },0);
-}
 
 var Rdfazer = {
     currentRange:null, 
@@ -39,6 +20,7 @@ var Rdfazer = {
     
     init: function(){
         var rdfazerIF = $("#rdfazerInterface")[0];
+	this.loadConfig();
         if(rdfazerIF){
             return rdfazerIF;
         }else{
@@ -115,7 +97,8 @@ var Rdfazer = {
         var relation = $("#rdfazerconcepts div[about='"+localHighlightUri+"'] div[rel='"+this.baseURI+"/highlightFor']");
 
         for(var i=0, uri; uri=uris[i]; i++){
-            relation.append("<span about='"+uri+"'></span>");
+	    var about = $("<div about='"+uri+"'></div>");
+            relation.append(about);
         }
 
         this.showHighlights();
@@ -217,7 +200,7 @@ var Rdfazer = {
         for(var i=0, highlight; highlight=highlights[i]; i++){
             var node = $(highlight);
             var highlightURI = node.attr("about");
-            var urinodes = $("#rdfazerconcepts div[about='"+highlightURI+"'] span");
+            var urinodes = $("#rdfazerconcepts div[about='"+highlightURI+"'] div[rel='http://localhost/highlightFor'] > div[about]");
             var uris = [];
             for(var j=0, uri; uri=urinodes[j]; j++){
                 uris.push($(uri).attr("about"));
@@ -287,7 +270,7 @@ var Rdfazer = {
 	    var result=resultDiv.searchResult;
 	    label= resultDiv.searchResult[resultDiv.searchResultLabel].value;
 	    var uri = result.target.value;
-	    url= this.config.uriToUrl(uri);
+	    url= this.getConfigProp("uriToUrl")(uri);
 	    uris.push(uri);		
 	}
 	if(uris.length>0){
@@ -298,13 +281,13 @@ var Rdfazer = {
     doSearch:function(searchTerm){
 	var query = "";
 	var self = this;
-	query = this.config.query.replace("$searchTerm",searchTerm,"g");
+	query = this.getConfigProp("query").replace(/\$searchTerm/g,searchTerm);
 	this.toggleLoading();
 	this.sparqlQuery(query, function(data){
 	    self.showResults(data.head.vars,data.results.bindings);
 	    self.toggleLoading();
-	},function(){
-	    self.message("error","Could not query the server for matching terms");
+	},function(result){
+	    self.message("error","Could not query the server for matching terms."+(result.responseText?"\nServer response:\n"+result.responseText:""));
 	    self.toggleLoading();
 	});
     },
@@ -333,7 +316,8 @@ var Rdfazer = {
 			      '<span class="toggle">+</span><span class="rdfazer-hcontent"></span><input type="checkbox"></input></div>' +
 			      '<div class="searchresult-body hidden"></div>' + 
 			      '</div>');
-	    var useAsLabel=$.inArray("label",vars)?"label":vars[0];
+	    var labelProperty = this.getConfigProp("labelProperty");
+	    var useAsLabel=$.inArray(labelProperty,vars)?labelProperty:vars[0];
 
 	    container.find(".rdfazer-hcontent").html(binding[useAsLabel].value);
 	    var details = ""
@@ -362,7 +346,20 @@ var Rdfazer = {
     },
 
     message:function(type,message){
-	alert(type+": "+message);
+	var message = $("<div class='rdfazermessage "+type+"'><div class='rdfazermessage-content'>"+message+"</div></div>");
+	$("body").prepend(message);
+	setTimeout(function(){
+	    message.addClass("open");
+	},0);
+	setTimeout(function(){
+	    message.addClass("fade");
+	},5000);
+	setTimeout(function(){
+	    message.remove();
+	},7000);
+	message.click(function(){
+	    this.remove();
+	});
     },
 
     sparqlQuery:function(query,success,error){
@@ -373,7 +370,7 @@ var Rdfazer = {
 		Accept : "application/sparql-results+json,application/json,text/html,application/xhtml+xml,application/xml; charset=utf-8",
 		"Content-Type": "text/plain; charset=utf-8"
 	    },
-	    url:this.config.sparql,
+	    url:this.getConfigProp("sparql"),
 	    data:{
 		query:query,
 		format:"application/sparql-results+json"
@@ -383,11 +380,47 @@ var Rdfazer = {
 	});
     },
 
+    saveConfig:function(config){
+	var self = this;
+	chrome.storage.local.set(config, function() {
+	    self.config = config;
+            self.message('Info','Settings saved');
+        });
+    },
+
+    loadConfig:function(){
+	var self = this;
+	chrome.storage.local.get(null,function(config) {
+	    $.merge(self.config,config)
+            self.message('Info','Settings loaded');
+        });
+    },
+
+    getConfigProp:function(property) {
+	var config = this.config;
+	var result = config[property];
+	if ( !result ){
+	    result=config.profiles[config.profile][property];
+	}
+	return result;
+    },
+
     config: {
 	sparql:"http://localhost:8890/sparql",
-	query: "select ?target (group_concat(distinct(?labels),\", \") as ?label) (group_concat(distinct(?types), \", \") as ?type) where { { ?target a <http://ec.europa.eu/esco/model#Occupation> . } UNION { ?target a <http://ec.europa.eu/esco/model#Skill> . } ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels . ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. ?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label0 . FILTER (bif:contains(?label0,\"'$searchTerm*'\")) . FILTER (lang(?label0) = \"en\") . } UNION { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2. ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label1 . FILTER (bif:contains(?label1,\"'$searchTerm*'\")) . FILTER (lang(?label1)= \"en\") . } FILTER (lang (?labels) = \"en\") } GROUP BY ?target",
-	uriToUrl:function(uri){
-	    return "https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/"+uri;
+	profile:"esco",
+	labelProperty:"label",
+	profiles: {
+	    esco: {
+		query: "select ?target ?label (group_concat(distinct(?labels),\"; \") as ?altLabels) (group_concat(distinct(?types), \"; \") as ?types) where { { ?target a <http://ec.europa.eu/esco/model#Occupation> . } UNION { ?target a <http://ec.europa.eu/esco/model#Skill> . } ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label . ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. ?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . FILTER (lang(?plabels) = \"en\") . } UNION { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2. ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . FILTER (lang(?plabels)= \"en\") . } OPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels. FILTER (lang (?labels) = \"en\") }FILTER (lang (?label) = \"en\") } GROUP BY ?target ?label",
+		uriToUrl:function(uri){
+		    return "https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/"+uri;
+		},
+		storedInfo: {
+		    label: {store:"<meta property='http://www.w3.org/2008/05/skos-xl#prefLabel' content='$label'>"},
+		    altLabels: {store:"<meta property='http://www.w3.org/2008/05/skos-xl#altLabel' content='$altLabels'>", csv:";"},
+		    types: {store:"<div rel='http://www.w3.org/1999/02/22-rdf-syntax-ns#type'><span about='$types'></span></div>", csv:";"}
+		}
+	    }
 	}
     }
 };

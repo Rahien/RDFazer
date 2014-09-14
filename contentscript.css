@@ -9,6 +9,7 @@ div#rdfazerInterface {
     z-index:1000;
     text-align:left;
     font-size:12px !important;
+    font-family: arial;
 }
 .ui-front {
     z-index:10000 !important;
@@ -216,6 +217,7 @@ a.highlight[title='unknown'], a.highlight.unknown {
 div.rdfazerdialogwrap {
     text-align:left !important;
     font-size:16px !important;
+    font-family: arial;
 }
 
 .rdfazerdialogwrap .ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix {
@@ -297,4 +299,32 @@ div#rdfazer-manual {
     height: 100%;
     position: relative;
     overflow: auto;
+}
+
+.rdfazermessage {
+    width:100%;
+    padding: 1em 0;
+    text-align: left;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999999;
+    margin-top: -3em;
+    background-color: lightyellow;
+    -webkit-transition: margin-top 1s, opacity 2s;     
+    transition: margin-top 1s, opacity 2s;
+    white-space: pre-wrap;
+}
+.rdfazermessage-content {
+    width: 960px;
+    margin: 0 auto;
+}
+.rdfazermessage.error {
+    background-color:pink;
+}
+.rdfazermessage.open {
+    margin-top: 0;
+}
+.rdfazermessage.fade {
+    opacity: 0;
 }

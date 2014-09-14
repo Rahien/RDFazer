@@ -8,7 +8,7 @@ This code was written based on the nice input from:
                    
 This code makes heavy use of the [[https://github.com/timdown/rangy][rangy]] library, jquery and jquery ui.
 
-RDFazer is currently a WIP and should not be used at all.
+RDFazer is currently a WIP and should only be used if you know what you are doing.
 
 
 * TODO
