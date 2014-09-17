@@ -10,9 +10,13 @@ This code makes heavy use of the [[https://github.com/timdown/rangy][rangy]] lib
 
 RDFazer is currently a WIP and should only be used if you know what you are doing.
 
-
 * TODO
-- [ ] Add paging
 - [X] Allow search through SPARQL endpoint
-- [ ] Add settings panel
-- [ ] Build a better CSS style...
+- [X] Add settings panel
+- [X] Build a better CSS style...
+- [X] allow direct save of RDFazed html file
+- [ ] allow storing query result properties as RDFa, apart from just the URI
+- [ ] Build final CSS style
+- [ ] Add paging to search results
+- [ ] allow showing other property than URI in side bar
+- [ ] add actual readme
