@@ -314,12 +314,18 @@ var Rdfazer = {
 	    var result=resultDiv.searchResult;
 	    label= resultDiv.searchResult[resultDiv.searchResultLabel].value;
 	    var uri = result.target.value;
-	    url= this.getConfigProp("uriToUrl")(uri);
+	    url= this.uriToUrl(uri);
 	    uris.push(uri);		
 	}
 	if(uris.length>0){
 	    this.addHighlightToSelection(label,url,uris);
 	}
+    },
+
+    uriToUrl:function(uri){
+	var funbody = "return "+this.getConfigProp("uriToUrl")+";";
+	var fun = new Function('uri',funbody);
+	return fun(uri);
     },
 
     doSearch:function(searchTerm){
@@ -455,9 +461,7 @@ var Rdfazer = {
 	profiles: {
 	    esco: {
 		query: "select ?target ?label (group_concat(distinct(?labels),\"; \") as ?altLabels) (group_concat(distinct(?types), \"; \") as ?types) where { { ?target a <http://ec.europa.eu/esco/model#Occupation> . } UNION { ?target a <http://ec.europa.eu/esco/model#Skill> . } ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label . ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. ?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . FILTER (lang(?plabels) = \"en\") . } UNION { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2. ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . FILTER (lang(?plabels)= \"en\") . } OPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels. FILTER (lang (?labels) = \"en\") }FILTER (lang (?label) = \"en\") } GROUP BY ?target ?label",
-		uriToUrl:function(uri){
-		    return "https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/"+uri;
-		},
+		uriToUrl:"'https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/' +uri",
 		labelProperty:"label",
 		storedInfo: {
 		    label: {store:"<meta property='http://www.w3.org/2004/02/skos/core#prefLabel' content='$label'>"},
@@ -467,9 +471,7 @@ var Rdfazer = {
 	    },
 	    "default": {
 		query: "select ?target ?label (group_concat(distinct(?labels),\"; \") as ?altLabels) (group_concat(distinct(?types), \"; \") as ?types) where { ?target <http://www.w3.org/2004/02/skos/core##prefLabel> ?label . ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .{ ?target <http://www.w3.org/2004/02/skos/core#prefLabel> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . } UNION { ?target <http://www.w3.org/2004/02/skos/core#altLabel> ?plabels . FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . } OPTIONAL {?target <http://www.w3.org/2004/02/skos/core#altLabel> ?labels. FILTER (lang (?labels) = \"en\") }FILTER (lang (?label) = \"en\") } GROUP BY ?target ?label",
-		uriToUrl:function(uri){
-		    return uri;
-		},
+		uriToUrl:"uri",
 		labelProperty:"label",
 		storedInfo: {
 		    label: {store:"<meta property='http://www.w3.org/2004/02/skos/core#prefLabel' content='$label'>"},
