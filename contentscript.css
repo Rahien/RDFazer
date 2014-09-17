@@ -218,13 +218,15 @@ div.rdfazerdialogwrap {
     text-align:left !important;
     font-size:16px !important;
     font-family: arial;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .rdfazerdialogwrap .ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix {
     position: absolute;
     top: 0.3em;
     right: 0.3em;
-    width: 50%;
+    width: 70%;
     z-index: 100002;
     background: none;
 }
