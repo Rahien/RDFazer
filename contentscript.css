@@ -337,3 +337,15 @@ div#rdfazer-manual {
 #rdfazer-settings .input > input {
     padding: 0 0.3em;
 }
+#rdfazer-settings .prop > * {
+    width: 100%;
+}
+.rdfazer-new-configwrap input {
+    width: 100%;
+}
+
+select.rdfazer-configs {
+}
+.rdfazer-new-configwrap span.label {
+    padding-right: 0.3em;
+}
