@@ -482,13 +482,4 @@ var Rdfazer = {
     }
 };
 
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-        if(request.type == "initRDFazer"){
-            Rdfazer.init();
-            sendResponse({status:"ok"});
-        } else if(request.type == "getPageContent"){
-            var htmlNodes = document.getElementsByTagName("html");
-            sendResponse({html:htmlNodes[0].outerHTML});
-        }
-  });
+Rdfazer.init();
