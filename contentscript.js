@@ -197,10 +197,16 @@ var Rdfazer = {
         $('#rdfazerdialog').dialog('destroy').remove();
         $('#rdfazer-settings').dialog('destroy').remove();
     },
-
-    addHighlightToSelection:function(name,url,uris){
+    
+    addHighlightToSelection:function(results){
         var highlighter = rangy.createHighlighter();
-        var localHighlightUri = "_:rdfazer"+(new Date()).getTime();
+        var localHighlightUri = this.getBaseURI() + "/rdfazer"+(new Date()).getTime();
+	var firstResult = results[0];
+
+	var labelProperty = this.getConfigProp("labelProperty");
+	var name = firstResult[labelProperty]?firstResult[labelProperty].value:firstResult.target.value;
+	
+	var url = this.uriToUrl(firstResult.target.value);
 
         highlighter.addClassApplier(rangy.createCssClassApplier("highlight", {
             ignoreWhiteSpace: true,
@@ -223,10 +229,10 @@ var Rdfazer = {
 
         highlighter.highlightRanges("highlight",[this.currentRange]);
 
-        this.addHighlightedConcept(localHighlightUri,uris);
+        this.addHighlightedConcept(localHighlightUri,results);
     },
 
-    addHighlightedConcept:function(localHighlightUri,uris){
+    addHighlightedConcept:function(localHighlightUri,results){
         var conceptsDiv = $("#rdfazerconcepts");
         if(conceptsDiv.length==0){
             $("body").append("<div id='rdfazerconcepts' style='display:none'></div>");
@@ -237,12 +243,60 @@ var Rdfazer = {
         
         var relation = $("#rdfazerconcepts div[about='"+localHighlightUri+"'] div[rel='"+this.baseURI+"/highlightFor']");
 
-        for(var i=0, uri; uri=uris[i]; i++){
-	    var about = $("<div about='"+uri+"'></div>");
+        for(var i=0, result; result=results[i]; i++){
+	    var about = this.describeResult(result);
             relation.append(about);
         }
 
         this.showHighlights();
+    },
+
+    describeResult:function(result){
+	var uri = result.target.value;
+	var description = $("<div about='"+uri+"'></div>");
+	var info = this.getConfigProp("storedInfo") || {};
+	for(var prop in info){
+	    var value = result[prop]?result[prop].value:null;
+	    var recipe = info[prop];
+	    if( recipe.csv ){
+		value = value.split(recipe.csv);
+	    }
+
+	    if(value != null && typeof value != "string" && value[0]!=null){
+		// assume like array, note: I know about rdfa chaining but don't feel like implementing it here, TODO
+		for (var i = 0, current; current = value[i]; i++){
+		    description.append(this.describeSingleResultProperty(recipe,current));
+		}
+	    }else{
+		description.append(this.describeSingleResultProperty(recipe,value));
+	    }
+	}
+
+	// provenance information
+	var sparql = this.getConfigProp("sparql");
+	description.append("<div rel='http://www.w3.org/ns/prov#wasDerivedFrom'><span about='"+sparql+"' typeof='http://www.w3.org/ns/sparql-service-description#Service' rel='http://www.w3.org/ns/sparql-service-description#endpoint' resource='"+sparql+"'></span></div>");
+
+	return description;
+    },
+
+    describeSingleResultProperty:function(recipe, value){
+	if(value != null){
+	    var propertyNode;
+	    var decorateTarget;
+	    if(recipe.type == "property"){
+		propertyNode = $("<meta property='"+recipe.predicate+"' content='"+value+"' />");
+		decorateTarget = propertyNode;
+	    }else{
+		// assume relation
+		propertyNode = $("<div rel='"+recipe.predicate+"'><span about='"+value+"'></span></div>");
+		decorateTarget = propertyNode.children();
+	    }
+	    if(recipe.decorate){
+		decorateTarget.prop(recipe.decorate);
+	    }
+	    return propertyNode;
+	}
+	return null;
     },
 
     readAndAddHighlight:function(){
@@ -342,17 +396,27 @@ var Rdfazer = {
             var node = $(highlight);
             var highlightURI = node.attr("about");
             var urinodes = $("#rdfazerconcepts div[about='"+highlightURI+"'] div[rel='http://localhost/highlightFor'] > div[about]");
-            var uris = [];
+            var labels = [];
             for(var j=0, uri; uri=urinodes[j]; j++){
-                uris.push($(uri).attr("about"));
+		var pred=this.getConfigProp("labelPredicate");
+		if(pred && pred!=""){
+		    var labelvalues = $(uri).find("meta[property='"+pred+"']").prop("content");
+		    if(labelvalues && labelvalues.length>0){
+			labels = labels.concat(labelvalues);
+		    }else{
+			labels.push($(uri).attr("about"));
+		    }
+		}else{
+                    labels.push($(uri).attr("about"));
+		}
             }
-	    var tag=this.buildHighlightTag(content,node,uris,highlightURI,highlightSpots);          
+	    var tag=this.buildHighlightTag(content,node,labels,highlightURI,highlightSpots);          
         }
 
     },
 
-    buildHighlightTag:function(content,node,uris,highlightURI,highlightSpots){
-	var tag=$("<a class='highlightTag' highlight= '"+highlightURI+"' href='"+node.attr("href")+"'>"+uris.join(", ")+"</a>");
+    buildHighlightTag:function(content,node,labels,highlightURI,highlightSpots){
+	var tag=$("<a class='highlightTag' highlight= '"+highlightURI+"' href='"+node.attr("href")+"'>"+labels.join(", ")+"</a>");
 
 	var top = node.offset().top;
 	var takenSpot = null;
@@ -403,19 +467,14 @@ var Rdfazer = {
 
     highlightAcceptedSearches:function(){
 	var checked=$("#rdfazer-search .search-results input:checked");
-	var label;
-	var uris=[];
-	var url;
+	var results=[];
 	for( var i=0, input; input=checked[i];i++){
 	    var resultDiv= input.parentNode.parentNode;
 	    var result=resultDiv.searchResult;
-	    label= resultDiv.searchResult[resultDiv.searchResultLabel].value;
-	    var uri = result.target.value;
-	    url= this.uriToUrl(uri);
-	    uris.push(uri);		
+	    results.push(result);		
 	}
-	if(uris.length>0){
-	    this.addHighlightToSelection(label,url,uris);
+	if(results.length>0){
+	    this.addHighlightToSelection(results);
 	}
     },
 
@@ -488,7 +547,6 @@ var Rdfazer = {
 	    $("#rdfazer-search .search-container").append(container);	    
 
 	    container[0].searchResult = binding;
-	    container[0].searchResultLabel = useAsLabel;
 	}
     },
 
@@ -575,30 +633,42 @@ var Rdfazer = {
 	return result;
     },
 
+    getBaseURI:function(){
+	var uri= this.config.fileURI;
+	if(uri == null || uri == ""){
+	    uri = document.URL;
+	}
+	if(uri.substr(-1) == '/') {
+            return uri.substr(0, uri.length - 1);
+	}
+	return uri;
+    },
+
     config: {
 	sparql:"http://localhost:8890/sparql",
+	fileURI:"",
 	profile:"esco",
 	profiles: {
 	    esco: {
-		query: "select ?target ?label (group_concat(distinct(?labels),\"; \") as ?altLabels) (group_concat(distinct(?types), \"; \") as ?types)\n where { \n{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \nUNION\n { ?target a <http://ec.europa.eu/esco/model#Skill> . } \n?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. \n?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . \nFILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels) = \"en\") . } \nUNION\n { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2.\n ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels)= \"en\") . \n} \nOPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n. FILTER (lang (?labels) = \"en\") \n}\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
+		query: "select ?target ?label (group_concat(distinct(?labels),\"| \") as ?altLabels) (group_concat(distinct(?types), \"| \") as ?types)\n where { \n{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \nUNION\n { ?target a <http://ec.europa.eu/esco/model#Skill> . } \n?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. \n?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . \nFILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels) = \"en\") . } \nUNION\n { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2.\n ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels)= \"en\") . \n} \nOPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n. FILTER (lang (?labels) = \"en\") \n}\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
 		uriToUrl:"'https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/' +uri",
 		labelProperty:"label",
 		labelPredicate:"http://www.w3.org/2004/02/skos/core#prefLabel",
 		storedInfo: {
-		    label: {store:"<meta property='http://www.w3.org/2004/02/skos/core#prefLabel' content='$label'>"},
-		    altLabels: {store:"<meta property='http://www.w3.org/2004/02/skos/core#altLabel' content='$altLabels'>", csv:";"},
-		    types: {store:"<div rel='http://www.w3.org/1999/02/22-rdf-syntax-ns#type'><span about='$types'></span></div>", csv:";"}
+		    label: {predicate:"http://www.w3.org/2004/02/skos/core#prefLabel", type:"property", decorate:{"xml:lang":"en"}},
+		    altLabels: {predicate:"http://www.w3.org/2004/02/skos/core#altLabel", type:"property", csv:"|", decorate:{"xml:lang":"en"}},
+		    types: {predicate:"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", type: "relation", csv:"|"}
 		}
 	    },
 	    "default (skos)": {
-		query: "select ?target ?label (group_concat(distinct(?labels),\"; \") as ?altLabels)\n (group_concat(distinct(?types), \"; \") as ?types) where {\n ?target <http://www.w3.org/2004/02/skos/core##prefLabel> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2004/02/skos/core#prefLabel> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . }\n UNION {\n ?target <http://www.w3.org/2004/02/skos/core#altLabel> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) .\n } OPTIONAL {\n?target <http://www.w3.org/2004/02/skos/core#altLabel> ?labels.\n FILTER (lang (?labels) = \"en\") }\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
+		query: "select ?target ?label (group_concat(distinct(?labels),\"| \") as ?altLabels)\n (group_concat(distinct(?types), \"| \") as ?types) where {\n ?target <http://www.w3.org/2004/02/skos/core##prefLabel> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2004/02/skos/core#prefLabel> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . }\n UNION {\n ?target <http://www.w3.org/2004/02/skos/core#altLabel> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) .\n } OPTIONAL {\n?target <http://www.w3.org/2004/02/skos/core#altLabel> ?labels.\n FILTER (lang (?labels) = \"en\") }\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
 		uriToUrl:"uri",
 		labelProperty:"label",
 		labelPredicate:"http://www.w3.org/2004/02/skos/core#prefLabel",
 		storedInfo: {
-		    label: {store:"<meta property='http://www.w3.org/2004/02/skos/core#prefLabel' content='$value'>"},
-		    altLabels: {store:"<meta property='http://www.w3.org/2004/02/skos/core#altLabel' content='$value'>", csv:";"},
-		    types: {store:"<div rel='http://www.w3.org/1999/02/22-rdf-syntax-ns#type'><span about='$value'></span></div>", csv:";"}
+		    label: {predicate:"http://www.w3.org/2004/02/skos/core#prefLabel", type:"property", decorate:{"xml:lang":"en"}},
+		    altLabels: {predicate:"http://www.w3.org/2004/02/skos/core#altLabel", type:"property", csv:"|", decorate:{"xml:lang":"en"}},
+		    types: {predicate:"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", type: "relation", csv:"|"}
 		}
 	    }
 

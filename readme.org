@@ -15,8 +15,10 @@ RDFazer is currently a WIP and should only be used if you know what you are doin
 - [X] Add settings panel
 - [X] Build a better CSS style...
 - [X] allow direct save of RDFazed html file
-- [ ] allow storing query result properties as RDFa, apart from just the URI
+- [X] allow storing query result properties as RDFa, apart from just the URI
+- [X] allow showing other property than URI in side bar
+- [X] add sparql endpoint provenance information
+- [ ] allow setting of storedInfo properties 
 - [ ] Build final CSS style
 - [ ] Add paging to search results
-- [ ] allow showing other property than URI in side bar
 - [ ] add actual readme
