@@ -17,6 +17,54 @@ var Rdfazer = {
 	locallink.setAttribute('download', 'rdfazer.html');
 	locallink.click();
     },
+
+    downloadConfig:function(){
+	var locallink = document.createElement('a');
+	locallink.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.config,null,"\t")));
+	locallink.setAttribute('download', 'rdfazer.json');
+	locallink.click();
+    },
+
+    configUploadDialog:function(){
+	var self = this;
+	var dialog=$("<div class='rdfazer-load-config-dialog' title='Load settings'><input type='file' style='visibility:hidden;'/><input type='button' value='Choose file' /></div>");
+	var fileUpload = dialog.find("input[type='file']");
+	dialog.find("input[type='button']").click(function(){
+            fileUpload.click();
+	});
+	fileUpload.change(function(){
+	    var file = fileUpload[0].files[0];
+	    var error = function(){
+		self.message("error", "Could not handle the uploaded file");
+		dialog.dialog("destroy").remove();
+	    };
+	    if (file) {
+		var reader = new FileReader();
+		reader.onload = function (evt) {
+		    try{ 
+			self.config= $.parseJSON(evt.target.result);
+			self.saveConfig(self.config);
+			dialog.dialog("destroy").remove();
+		    }catch(e){
+			error();
+		    }
+		}
+		reader.onerror = error;
+		reader.readAsText(file, "UTF-8");
+	    }
+	});
+	
+	$("body").append(dialog);
+	dialog.dialog({
+	    height: 200,
+	    width: 500,
+	    modal: true,
+	    close:function(){
+		dialog.dialog("destroy").remove();
+	    },
+	    dialogClass: "rdfazer-load-configwrap"
+	});
+    },
     
     init: function(){
         var rdfazerIF = $("#rdfazerInterface")[0];
@@ -85,6 +133,12 @@ var Rdfazer = {
 		    }},{text:"Reset", click:function(){
 			self.resetConfig();
 			dialog.dialog('close');
+		    }}, {text:"Download Settings", click:function(){
+			self.downloadConfig();
+			dialog.dialog('close');
+		    }}, {text:"Upload Settings", click:function(){
+			self.configUploadDialog();
+			dialog.dialog('close');
 		    }}],
 		    dialogClass: "rdfazersettingswrap"
 		});
@@ -103,7 +157,49 @@ var Rdfazer = {
 		    self.newConfigDialog();
 		});
 
+		$("#rdfazer-settings .specs .wrap .toggle, #rdfazer-settings .specs .wrap h2").click(function(){
+		    $(this).parent().toggleClass("open");
+		});
+
+		$("#rdfazer-settings .storedInfoWrap button.new-property").click(function(){
+		    self.newStoredInfoDialog();
+		});
+
 	    });
+	});
+    },
+
+    newStoredInfoDialog:function(){
+	var self = this;
+	var dialog=$("<div class='rdfazer-new-stored-info-dialog' title='New Property'><div><span class='label'>Name</span><input class='rdfazer-new-config-text' type='text'></div></div>");
+	$("body").append(dialog);
+	dialog.dialog({
+	    height: 200,
+	    width: 500,
+	    modal: true,
+	    buttons: [{text:"Ok", click:function(){
+		var name=$(this).find("input").val();
+		if(!name || name == ""){
+		    name = "new profile";
+		}
+		
+		var count = 0;
+		var userName = name;
+		var selectedConfig = $("#rdfazer-settings select.rdfazer-configs").val();
+		var storedInfo=self.config.profiles[selectedConfig].storedInfo;
+
+		while(storedInfo[name]){
+		    count++;
+		    name = userName + count;
+		}
+		storedInfo[name]={};
+		self.addStoredInfoProp(name,storedInfo,$("#rdfazer-settings .storedInfo"));
+		dialog.dialog("destroy").remove();
+	    }}],
+	    close:function(){
+		dialog.dialog("destroy").remove();
+	    },
+	    dialogClass: "rdfazer-new-stored-infowrap"
 	});
     },
 
@@ -190,6 +286,48 @@ var Rdfazer = {
 	    }
 	}
 
+	this.fillStoredInfoSettings(selectedProfile);
+
+    },
+
+    fillStoredInfoSettings:function(selectedProfile){
+	var self = this;
+	var container = $("#rdfazer-settings .storedInfo");
+	container.empty();
+
+	var storedInfo = this.config.profiles[selectedProfile].storedInfo;
+	for(var prop in storedInfo){
+	    this.addStoredInfoProp(prop,storedInfo,container);
+	}
+    },
+
+    addStoredInfoProp:function(prop,storedInfo,container){
+	var value = storedInfo[prop];
+	var stringValue = JSON.stringify(value,null,"\t");
+	var lines = stringValue.split(/\r\n|\r|\n/).length;
+	var propertyDiv = $("<div class='storedProp prop'><span class='label'>"+prop+"</span><span class='remove' title='remove'></span>"+
+			    "<textarea spellcheck='false' rows='"+lines+"'  class='storedProp-value'>"+stringValue+"</textarea></div>");
+	propertyDiv[0].storedInfo=storedInfo;
+	propertyDiv[0].prop = prop;
+	propertyDiv.find("span.remove").click(function(){
+	    var parent = $(this).parent();
+	    parent.remove();
+	    delete parent[0].storedInfo[parent[0].prop];
+	});
+	propertyDiv.find("textarea").change(function(){
+	    var parent = $(this).parent();
+	    var value = $(this).val();
+	    try{
+		var json = $.parseJSON(value);
+		parent[0].storedInfo[parent[0].prop]=json;
+		parent.removeClass("error");
+	    }catch(e){
+		if(!parent.hasClass("error")){
+		    parent.addClass("error");
+		}
+	    }
+	});
+	container.append(propertyDiv);
     },
 
     destroy:function(){

@@ -350,3 +350,57 @@ select.rdfazer-configs {
 .rdfazer-new-configwrap span.label {
     padding-right: 0.3em;
 }
+
+.rdfazer-settings span.toggle:before {
+    float: left;
+    content: "\25BA";
+    display: block;
+    width: 1em;
+    height: 1em;
+    margin: 0.3em;
+    font-family: Arial;
+}
+.rdfazer-settings .specs .open span.toggle:before {
+    content: "\25BC";
+}
+.rdfazer-settings h2 {
+    font-family: Arial;
+    margin: 0.3em;
+}
+
+.rdfazer-settings .storedInfoExtraWrap, .rdfazer-settings .configspecs {
+    display:none;
+}
+.rdfazer-settings .open .storedInfoExtraWrap, .rdfazer-settings .open .configspecs {
+    display:block;
+}
+
+#rdfazer-settings span.remove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1em;
+    height: 1em;
+    background-image: url("/lib/images/close.png");
+    background-size: 100% 100%;
+    cursor:pointer;
+    cursor:hand;
+}
+#rdfazer-settings .prop {
+    position: relative;
+}
+#rdfazer-settings span.remove:hover {
+    top: 1px;
+    right: -1px;
+}
+#rdfazer-settings .prop.error textarea {
+    border:solid 2px red;
+}
+
+.rdfazer-new-stored-info-dialog span.label {
+    margin-right: 0.3em;
+}
+input.rdfazer-new-config-text {
+    display: block;
+    width: 100%;
+}
