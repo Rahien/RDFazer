@@ -340,6 +340,9 @@ div#rdfazer-manual {
 }
 #rdfazer-settings .prop > * {
     width: 100%;
+    display: block;
+    padding: 0.3em;
+    box-sizing: border-box;
 }
 .rdfazer-new-configwrap input {
     width: 100%;
@@ -366,6 +369,9 @@ select.rdfazer-configs {
 .rdfazer-settings h2 {
     font-family: Arial;
     margin: 0.3em;
+    position: relative;
+    display: block;
+    line-height: 1em;
 }
 
 .rdfazer-settings .storedInfoExtraWrap, .rdfazer-settings .configspecs {
@@ -377,21 +383,21 @@ select.rdfazer-configs {
 
 #rdfazer-settings span.remove {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 0.3em;
+    right: 0.3em;
     width: 1em;
     height: 1em;
     background-image: url("/lib/images/close.png");
     background-size: 100% 100%;
-    cursor:pointer;
-    cursor:hand;
+    cursor: pointer;
+    cursor: hand;
 }
 #rdfazer-settings .prop {
     position: relative;
 }
 #rdfazer-settings span.remove:hover {
-    top: 1px;
-    right: -1px;
+    margin-top: 1px;
+    margin-right: -1px;
 }
 #rdfazer-settings .prop.error textarea {
     border:solid 2px red;
@@ -403,4 +409,61 @@ select.rdfazer-configs {
 input.rdfazer-new-config-text {
     display: block;
     width: 100%;
+}
+
+.rdfazersettingswrap .ui-dialog-buttonset button.download-settings span, .rdfazersettingswrap .ui-dialog-buttonset button.upload-settings span {
+    width: 29px;
+    height: 29px;
+    padding: 0;
+    color: transparent;
+    background-image: url('/lib/images/save-no-circle.png');
+    background-size: 100% 100%;
+    margin: 3px;
+    box-sizing: border-box;
+}
+.rdfazersettingswrap .ui-dialog-buttonset button.upload-settings span {
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.rdfazersettingswrap button.upload-settings.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only {
+    overflow: hidden;
+}
+
+#rdfazer-settings .prop .label {
+    background: #111111 url("/lib/images/ui-bg_glass_40_111111_1x400.png") 50% 50% repeat-x;
+    color: white;
+    border-radius: 5px;
+}
+.rdfazer-settings button.new-property, .rdfazer-settings .config-select > * {
+    background: #111111 url("/lib/images/ui-bg_glass_40_111111_1x400.png") 50% 50% repeat-x;     color: white;     
+    border-radius: 5px;
+    padding: 0.5em 1.5em;
+    outline: none;
+    border: solid 1px black;
+    cursor:hand;
+    cursor:pointer;
+}
+.rdfazer-settings .config-select > * {
+    padding: 0.1em 0.5em;
+}
+.rdfazer-settings button.new-property:hover, .rdfazer-settings .config-select > *:hover {
+    border: 1px solid #000000;
+    background: #1c1c1c url("/lib/images/ui-bg_glass_55_1c1c1c_1x400.png") 50% 50% repeat-x;
+    font-weight: normal;
+    color: #ffffff;
+}
+
+.rdfazer-settings input.hidden-file-input {
+    display: none;
+}
+.rdfazer-settings .general-config .input span {
+    font-weight: bold;
+}
+.rdfazersettingswrap {
+    font-size: 16px !important;
+    font-family: Arial !important;
 }

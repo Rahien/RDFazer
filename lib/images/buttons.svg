@@ -22,14 +22,14 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="797.39154"
-     inkscape:cy="700.52465"
+     inkscape:zoom="3.959798"
+     inkscape:cx="896.82332"
+     inkscape:cy="591.96129"
      inkscape:document-units="px"
-     inkscape:current-layer="svg2"
+     inkscape:current-layer="g5681"
      showgrid="false"
      inkscape:window-width="1855"
-     inkscape:window-height="873"
+     inkscape:window-height="941"
      inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1" />
@@ -97,6 +97,20 @@
       <rect
          style="fill:#ffffff;fill-opacity:1;stroke:none"
          id="rect3036-5-8"
+         width="12.535534"
+         height="35.303303"
+         x="881.07819"
+         y="213.17795"
+         rx="0.12626578"
+         ry="0.81632656"
+         transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,0,0)" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath3034-1-1-6">
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:none"
+         id="rect3036-5-8-0"
          width="12.535534"
          height="35.303303"
          x="881.07819"
@@ -445,6 +459,42 @@
       <rect
          style="fill:#ffffff;fill-opacity:1;stroke:none"
          id="rect5674"
+         width="16.893"
+         height="2.7779195"
+         x="877.96259"
+         y="394.94479"
+         rx="0.59893698"
+         ry="0.55125284" />
+    </g>
+    <rect
+       style="fill:none;fill-opacity:1;stroke:none"
+       id="rect3104"
+       width="29"
+       height="29"
+       x="871.00409"
+       y="419.54349"
+       rx="0.54288298"
+       ry="0.70336282"
+       inkscape:export-filename="/home/karel/source/RDFazer/lib/images/save-no-circle.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <g
+       transform="translate(-0.90505986,41.879125)"
+       id="g5677-3">
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:none"
+         id="rect3022-4-8"
+         width="18.182745"
+         height="18.182745"
+         x="778.43396"
+         y="-467.63754"
+         rx="0.87510127"
+         ry="0.81632656"
+         transform="matrix(-0.47749841,0.47749841,-0.47749841,-0.47749841,1043.4962,-208.37263)"
+         clip-path="url(#clipPath3034-1-1-6)" />
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:none"
+         id="rect5674-4"
          width="16.893"
          height="2.7779195"
          x="877.96259"

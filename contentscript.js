@@ -25,47 +25,6 @@ var Rdfazer = {
 	locallink.click();
     },
 
-    configUploadDialog:function(){
-	var self = this;
-	var dialog=$("<div class='rdfazer-load-config-dialog' title='Load settings'><input type='file' style='visibility:hidden;'/><input type='button' value='Choose file' /></div>");
-	var fileUpload = dialog.find("input[type='file']");
-	dialog.find("input[type='button']").click(function(){
-            fileUpload.click();
-	});
-	fileUpload.change(function(){
-	    var file = fileUpload[0].files[0];
-	    var error = function(){
-		self.message("error", "Could not handle the uploaded file");
-		dialog.dialog("destroy").remove();
-	    };
-	    if (file) {
-		var reader = new FileReader();
-		reader.onload = function (evt) {
-		    try{ 
-			self.config= $.parseJSON(evt.target.result);
-			self.saveConfig(self.config);
-			dialog.dialog("destroy").remove();
-		    }catch(e){
-			error();
-		    }
-		}
-		reader.onerror = error;
-		reader.readAsText(file, "UTF-8");
-	    }
-	});
-	
-	$("body").append(dialog);
-	dialog.dialog({
-	    height: 200,
-	    width: 500,
-	    modal: true,
-	    close:function(){
-		dialog.dialog("destroy").remove();
-	    },
-	    dialogClass: "rdfazer-load-configwrap"
-	});
-    },
-    
     init: function(){
         var rdfazerIF = $("#rdfazerInterface")[0];
         if(rdfazerIF){
@@ -112,12 +71,12 @@ var Rdfazer = {
                     height: 500,
                     width: 720,
                     modal: true,
-		    buttons:[{text:"Save", click:function(){
+		    buttons:[{text:"Save", title:"save settings", click:function(){
 			var config = self.readConfig();
 			self.saveConfig(config);
 
 			dialog.dialog('close');
-		    }},{text:"Remove config", click:function(){
+		    }},{text:"Remove config", title:"remove the currently selected configuration", click:function(){
 			var config = self.readConfig();
 			var profileNumber = 0;
 			for (var prop in config.profiles){
@@ -130,14 +89,13 @@ var Rdfazer = {
 			    self.removeProfile(profile);
 			}
 			dialog.dialog('close');
-		    }},{text:"Reset", click:function(){
-			self.resetConfig();
-			dialog.dialog('close');
-		    }}, {text:"Download Settings", click:function(){
+		    }},{text:"Download Settings", "class": "download-settings", title: "download settings as json", click:function(){
 			self.downloadConfig();
 			dialog.dialog('close');
-		    }}, {text:"Upload Settings", click:function(){
-			self.configUploadDialog();
+		    }}, {text:"Upload Settings", "class":"upload-settings", title:"upload json settings file", click:function(){
+			$("#rdfazer-settings input.hidden-file-input").click();
+		    }}, {text:"Reset", title:"reset settings to default", click:function(){
+			self.resetConfig();
 			dialog.dialog('close');
 		    }}],
 		    dialogClass: "rdfazersettingswrap"
@@ -165,6 +123,28 @@ var Rdfazer = {
 		    self.newStoredInfoDialog();
 		});
 
+		var fileUpload = $("#rdfazer-settings input.hidden-file-input");
+		fileUpload.change(function(){
+		    var file = fileUpload[0].files[0];
+		    var error = function(){
+			self.message("error", "Could not handle the uploaded file");
+			dialog.dialog( "close" );
+		    };
+		    if (file) {
+			var reader = new FileReader();
+			reader.onload = function (evt) {
+			    try{ 
+				self.config= $.parseJSON(evt.target.result);
+				self.saveConfig(self.config);
+				dialog.dialog( "close" );
+			    }catch(e){
+				error();
+			    }
+			}
+			reader.onerror = error;
+			reader.readAsText(file, "UTF-8");
+		    }
+		});
 	    });
 	});
     },
@@ -339,12 +319,16 @@ var Rdfazer = {
     addHighlightToSelection:function(results){
         var highlighter = rangy.createHighlighter();
         var localHighlightUri = this.getBaseURI() + "/rdfazer"+(new Date()).getTime();
-	var firstResult = results[0];
-
-	var labelProperty = this.getConfigProp("labelProperty");
-	var name = firstResult[labelProperty]?firstResult[labelProperty].value:firstResult.target.value;
-	
-	var url = this.uriToUrl(firstResult.target.value);
+	var name, url;
+	if(results.manual){
+	    name = results.name;
+	    url = results.url;
+	}else {
+	    var firstResult = results[0];
+	    var labelProperty = this.getConfigProp("labelProperty");
+	    name = firstResult[labelProperty]?firstResult[labelProperty].value:firstResult.target.value;
+	    url = this.uriToUrl(firstResult.target.value);
+	}
 
         highlighter.addClassApplier(rangy.createCssClassApplier("highlight", {
             ignoreWhiteSpace: true,
@@ -381,11 +365,16 @@ var Rdfazer = {
         
         var relation = $("#rdfazerconcepts div[about='"+localHighlightUri+"'] div[rel='"+this.baseURI+"/highlightFor']");
 
-        for(var i=0, result; result=results[i]; i++){
-	    var about = this.describeResult(result);
-            relation.append(about);
-        }
-
+	if(results.manual){
+	    for(var i=0, uri; uri = results.uris[i]; i++){
+		relation.append("<div about='"+uri+"'></div>");
+	    }
+	}else{
+            for(var i=0, result; result=results[i]; i++){
+		var about = this.describeResult(result);
+		relation.append(about);
+            }
+	}
         this.showHighlights();
     },
 
@@ -446,7 +435,7 @@ var Rdfazer = {
             uris.push($(uri).val());
         }
         
-        this.addHighlightToSelection(name,url,uris);
+        this.addHighlightToSelection({name:name,url:url,uris:uris, manual:true});
     },
 
     addDialog:function(){
