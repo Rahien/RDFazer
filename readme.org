@@ -83,7 +83,6 @@ RDFazer also reads the highlights already present in a file from an earlier sess
 #+BEGIN_SRC javascript
             "labelPredicate":"http://www.w3.org/2004/02/skos/core#prefLabel",
 #+END_SRC
-
 ** Stored Information
 RDFazer can store information returned by the query other directly in the annotated file. For every variable in the query result set, a key-value pair MAY be present in the 'storedInfo' property. The key MUST be the name of the variable that is returned. The value MUST have the following structure:
 
@@ -113,6 +112,42 @@ RDFazer can store information returned by the query other directly in the annota
           }
       }
   }
+#+END_SRC
+
+** Full example
+The previous snippets combine to the following configuration json file:
+
+#+BEGIN_SRC javascript
+  {
+      "sparql":"http://localhost:8890/sparql",
+      "fileURI":"",
+      "profile":"esco",
+      "profiles": {
+          "esco": {
+              "query": "select ?target ?label (group_concat(distinct(?labels),\"| \") as ?altLabels) (group_concat(distinct(?types), \"| \") as ?types)\n where { \n{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \nUNION\n { ?target a <http://ec.europa.eu/esco/model#Skill> . } \n?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. \n?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . \nFILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels) = \"en\") . } \nUNION\n { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2.\n ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels)= \"en\") . \n} \nOPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n. FILTER (lang (?labels) = \"en\") \n}\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
+              "uriToUrl":"'https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/' +uri",
+              "labelProperty":"label",
+              "labelPredicate":"http://www.w3.org/2004/02/skos/core#prefLabel",
+              "storedInfo": {
+                  "label": {
+                      "predicate":"http://www.w3.org/2004/02/skos/core#prefLabel", 
+                      "type":"property", 
+                      "decorate":{"xml:lang":"en"}
+                  },
+                  "altLabels": {
+                      "predicate":"http://www.w3.org/2004/02/skos/core#altLabel", 
+                      "type":"property", 
+                      "csv":"|", 
+                      "decorate":{"xml:lang":"en"}
+                  },
+                  "types": {
+                      "predicate":"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
+                      "type": "relation", 
+                      "csv":"|"
+                  }
+              }
+          }
+      }
 #+END_SRC
 * TODO Checklist
 - [X] Allow search through SPARQL endpoint
