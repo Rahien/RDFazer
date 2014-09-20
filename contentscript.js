@@ -325,7 +325,7 @@ var Rdfazer = {
 	    url = results.url;
 	}else {
 	    var firstResult = results[0];
-	    var labelProperty = this.getConfigProp("labelProperty");
+	    var labelProperty = this.getConfigProp("labelProperty") || "label";
 	    name = firstResult[labelProperty]?firstResult[labelProperty].value:firstResult.target.value;
 	    url = this.uriToUrl(firstResult.target.value);
 	}
@@ -606,9 +606,14 @@ var Rdfazer = {
     },
 
     uriToUrl:function(uri){
-	var funbody = "return "+this.getConfigProp("uriToUrl")+";";
-	var fun = new Function('uri',funbody);
-	return fun(uri);
+	var transformer = this.getConfigProp("uriToUrl");
+	if(!transformer || transformer == ""){
+	    return uri;
+	}else{
+	    var funbody = "return "+transformer+";";
+	    var fun = new Function('uri',funbody);
+	    return fun(uri);
+	}
     },
 
     doSearch:function(searchTerm){
@@ -649,7 +654,7 @@ var Rdfazer = {
 			      '<span class="toggle">+</span><span class="rdfazer-hcontent"></span><input type="checkbox"></input></div>' +
 			      '<div class="searchresult-body hidden"></div>' + 
 			      '</div>');
-	    var labelProperty = this.getConfigProp("labelProperty");
+	    var labelProperty = this.getConfigProp("labelProperty") || "label";
 	    var useAsLabel=$.inArray(labelProperty,vars)?labelProperty:vars[0];
 
 	    container.find(".rdfazer-hcontent").html(binding[useAsLabel].value);
