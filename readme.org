@@ -47,9 +47,9 @@ RDFazer works with different profiles, the idea is that one can quickly switch b
 
 The different profiles are listed in an object, working as a hash, from profile name to the profile description, holding all the profile properties. All the following properties are part of one profile.
 #+BEGIN_SRC javascript
-    profile:"esco",
-    profiles: {
-        esco: {
+    "profile":"esco",
+    "profiles": {
+        "esco": {
 #+END_SRC
 
 ** Query
@@ -60,28 +60,28 @@ The query defines what is being searched for when the user searches for a concep
 - the query SHOULD return only one result per concept, as no duplicate checking is performed
 
 #+BEGIN_SRC javascript
-            query: "select ?target ?label (group_concat(distinct(?labels),\"| \") as ?altLabels) (group_concat(distinct(?types), \"| \") as ?types)\n where { \n{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \nUNION\n { ?target a <http://ec.europa.eu/esco/model#Skill> . } \n?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. \n?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . \nFILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels) = \"en\") . } \nUNION\n { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2.\n ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels)= \"en\") . \n} \nOPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n. FILTER (lang (?labels) = \"en\") \n}\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
+            "query": "select ?target ?label (group_concat(distinct(?labels),\"| \") as ?altLabels) (group_concat(distinct(?types), \"| \") as ?types)\n where { \n{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \nUNION\n { ?target a <http://ec.europa.eu/esco/model#Skill> . } \n?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. \n?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . \nFILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels) = \"en\") . } \nUNION\n { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2.\n ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels)= \"en\") . \n} \nOPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n. FILTER (lang (?labels) = \"en\") \n}\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
 #+END_SRC
 
 ** URI to URL
 The URI of the concept to highlight may not necessarily be backed up with a Linked Data architecture that allows to use the URI as a URL. In that case, the 'uriToUrl' property holds a string with a javascript expression to transform the URI to a URL with information on the concept. If this is left blank, the URI is used as a URL.
 
 #+BEGIN_SRC javascript
-            uriToUrl:"'https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/' +uri",
+            "uriToUrl":"'https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/' +uri",
 #+END_SRC
 
 ** Label Property
 The query MAY return a human readable label concisely describing the returned concept. If so, the 'labelProperty' can point to the variable holding that label in the query result. This is an optional property, if it is not set, it is assumed to be equal to "label". If no such variable is found in the query result set, the URI of the concept is returned instead.
 
 #+BEGIN_SRC javascript
-            labelProperty:"label",
+            "labelProperty":"label",
 #+END_SRC
 
 ** Label Predicate
 RDFazer also reads the highlights already present in a file from an earlier session. It must therefore know which predicate to use as a label to show to the user. The 'labelPredicate' defines the value of this predicate. If no such predicate is found for a highlighted concept, the concept's URI is shown instead.
 
 #+BEGIN_SRC javascript
-            labelPredicate:"http://www.w3.org/2004/02/skos/core#prefLabel",
+            "labelPredicate":"http://www.w3.org/2004/02/skos/core#prefLabel",
 #+END_SRC
 
 ** Stored Information
@@ -93,15 +93,28 @@ RDFazer can store information returned by the query other directly in the annota
 - decorate: a json object with key value pairs defining extra attributes to be set on the value of the stored property. This is useful for defining the language of labels for instance.
 
 #+BEGIN_SRC javascript
-            storedInfo: {
-                label: {predicate:"http://www.w3.org/2004/02/skos/core#prefLabel", type:"property", decorate:{"xml:lang":"en"}},
-                altLabels: {predicate:"http://www.w3.org/2004/02/skos/core#altLabel", type:"property", csv:"|", decorate:{"xml:lang":"en"}},
-                types: {predicate:"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", type: "relation", csv:"|"}
-            }
-        }
-    }
+          "storedInfo": {
+              "label": {
+                  "predicate":"http://www.w3.org/2004/02/skos/core#prefLabel", 
+                  "type":"property", 
+                  "decorate":{"xml:lang":"en"}
+              },
+              "altLabels": {
+                  "predicate":"http://www.w3.org/2004/02/skos/core#altLabel", 
+                  "type":"property", 
+                  "csv":"|", 
+                  "decorate":{"xml:lang":"en"}
+              },
+              "types": {
+                  "predicate":"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
+                  "type": "relation", 
+                  "csv":"|"
+              }
+          }
+      }
+  }
 #+END_SRC
-* TODO
+* TODO Checklist
 - [X] Allow search through SPARQL endpoint
 - [X] Add settings panel
 - [X] Build a better CSS style...
