@@ -3,14 +3,46 @@
 * Introduction
 RDFazer is a chrome browser plugin for tagging a website with RDFa concepts. It only tags the static page and does not store the content anywhere. It was conceived for taking an existing (static) web page and tagging it with concepts from some taxonomy (e.g. the EC ESCO taxonomy). This page can then be stored elsewhere.
 
-This code was written based on the nice input from:
-- the tutorial provided by Google :: e.g. https://developer.chrome.com/extensions/getstarted
-                   
 This code makes heavy use of the [[https://github.com/timdown/rangy][rangy]] library, jquery and jquery-ui.
 
 RDFazer is currently a WIP and should only be used if you know what you are doing.
 
 * Usage
+RDFazer is a light-weight chrome browser extension that allows tagging a website with RDFa concepts from any SPARQL endpoint. 
+
+** Interface
+The interface of RDFazer is shown in the image below.
+[[file:doc-img/interface.png]]
+
+- *start RDFazer:* RDFazer is started by clicking the browser extension button on the top right of the screen. At this point, all RDFazer resources are loaded. As long as this button is not clicked, only a bare minimum of resources is loaded. Once RDFazer is ready, the RDFazer side bar will become visible on the screen.
+- *close RDFazer:* This button closes RDFazer and removes all RDFazer interface elements from the web page. The tagged concepts remain.
+- *switch side:* This button switches the interface between the left and the right of the screen.
+- *show highlight:* This button opens the RDFazer interface up, so it shows the highlighted concepts.
+- *save html:* This button first removes all RDFazer interface elements and then downloads the web page as an HTML file with all the highlighted concepts. Until this button is pressed, none of the changes made by RDFazer are persisted. When the web page is loaded later and RDFazer is activated, it will recognize all highlighted concepts from before.
+- *settings:* This button allows the modification of the RDFazer settings, see [[Configuration][the configuration section]]. The settings are persisted on the local machine for later reuse.
+- *highlight selected:* This button opens a dialog that allows the user to tag the currently selected text on his webpage, see below. This selection can span multiple HTML elements and element borders (have a look at the [[https://github.com/timdown/rangy][rangy]] library if you're interested in how this is done).
+
+To tag a concept, select the part of text you want to tag and click the 'highlight selected' button. To remove a tag, click it and a dialog will pop up that allows you to remove the tag.
+
+** Search SPARQL endpoint
+RDFazer allows a search of any SPARQL endpoint (see the [[Configuration][the configuration section]] for how to configure the search). The interface for the search is shown below.
+
+[[file:doc-img/search.png]]
+
+Enter the search term in the search field. To search, press enter (while in the search field).
+
+The results are shown by their labels, to get more information on the results of the search query, click the results open by clicking the toggle button on the left. 
+
+Any number of results can be added to the concept. If you need to do multiple searches to find all the matches you want, simply check the results of the first set and do a new search. It will keep the checked results of the previous search and add the new search results.
+
+Clear all (checked and unchecked) results using the 'clear' button.
+
+Tag the selection with all checked concepts using the 'highlight' button.
+
+** Manual tagging
+The manual tagging interface is less powerful than the search interface. It only allows to provide a URI, URL and label for a selection. Add URIs using the '+' button and remove the last URI by using the '-' button.
+
+[[file:doc-img/manual.png]]
 
 * Installation
 RDFazer is a chrome browser extension. To install:
@@ -158,6 +190,7 @@ The previous snippets combine to the following configuration json file:
 - [X] allow showing other property than URI in side bar
 - [X] add SPARQL endpoint provenance information
 - [X] allow setting of storedInfo properties 
-- [ ] Build final CSS style
+- [X] add actual readme
+- [X] Build final CSS style
 - [ ] Add paging to search results
-- [ ] add actual readme
+- [ ] Allow removal of results of an earlier session.

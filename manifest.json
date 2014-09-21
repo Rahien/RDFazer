@@ -8,7 +8,7 @@
 	"default_icon": "icon.png"
     },
     "background": {
-        "scripts":["lib/jquery-2.0.3.min.js","background.js","utils.js"]
+        "scripts":["background.js"]
     },
     "permissions": ["tabs", "<all_urls>","storage"],
     "web_accessible_resources": ["lib/jquery-2.0.3.min.map","lib/jquery-2.0.3.js","contentscript.css","settings.html", "interface.html","dialog.html","lib/jquery-ui.css","lib/images/*"]

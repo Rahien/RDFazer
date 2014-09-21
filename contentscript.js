@@ -651,8 +651,8 @@ var Rdfazer = {
 	for(var i = 0, binding; binding = bindings [i]; i++){
 	    var container = $('<div class="rdfazer-searchresult">'+
 			      '<div class="rdfazer-searchresult-head">'+
-			      '<span class="toggle">+</span><span class="rdfazer-hcontent"></span><input type="checkbox"></input></div>' +
-			      '<div class="searchresult-body hidden"></div>' + 
+			      '<span class="toggle"></span><span class="rdfazer-hcontent"></span><input type="checkbox"></input></div>' +
+			      '<div class="searchresult-body"></div>' + 
 			      '</div>');
 	    var labelProperty = this.getConfigProp("labelProperty") || "label";
 	    var useAsLabel=$.inArray(labelProperty,vars)?labelProperty:vars[0];
@@ -664,7 +664,7 @@ var Rdfazer = {
 		details += "<div><span>"+varname+":</span><span>"+binding[varname].value+"</span></div>"
 	    }    
 	    container.find(".toggle").click(function(event){
-		$(this).parent().parent().find(".searchresult-body").toggleClass("hidden");
+		$(this).parent().parent().toggleClass("open");
 		event.stopPropagation();
 	    });
 	    container.find(".rdfazer-searchresult-head").click(function(){

@@ -255,7 +255,7 @@ div.rdfazerdialogwrap {
     box-sizing: border-box;
     overflow: hidden;
     padding-top: 30px;
-    padding-bottom: 30px;
+    padding-bottom: 40px;
 }
 #rdfazerdialog .search-results-wrap > label {
     position: absolute;
@@ -438,7 +438,7 @@ input.rdfazer-new-config-text {
     color: white;
     border-radius: 5px;
 }
-.rdfazer-settings button.new-property, .rdfazer-settings .config-select > * {
+div#rdfazer-manual button, #rdfazerdialog .searchbuttons button, .rdfazer-settings button.new-property, .rdfazer-settings .config-select > * {
     background: #111111 url("/lib/images/ui-bg_glass_40_111111_1x400.png") 50% 50% repeat-x;     color: white;     
     border-radius: 5px;
     padding: 0.5em 1.5em;
@@ -448,9 +448,9 @@ input.rdfazer-new-config-text {
     cursor:pointer;
 }
 .rdfazer-settings .config-select > * {
-    padding: 0.1em 0.5em;
+    padding: 0.5em 0.5em;
 }
-.rdfazer-settings button.new-property:hover, .rdfazer-settings .config-select > *:hover {
+div#rdfazer-manual button:hover, #rdfazerdialog .searchbuttons button:hover, .rdfazer-settings button.new-property:hover, .rdfazer-settings .config-select > *:hover {
     border: 1px solid #000000;
     background: #1c1c1c url("/lib/images/ui-bg_glass_55_1c1c1c_1x400.png") 50% 50% repeat-x;
     font-weight: normal;
@@ -466,4 +466,27 @@ input.rdfazer-new-config-text {
 .rdfazersettingswrap {
     font-size: 16px !important;
     font-family: Arial !important;
+}
+#rdfazerdialog span.toggle:before {
+    content: "\25BA";
+    margin-right: 0.3em;
+}
+#rdfazerdialog .rdfazer-searchresult.open span.toggle:before {
+    content: "\25BC";
+}
+.rdfazer-searchresult .searchresult-body {
+    display:none;
+}
+.rdfazer-searchresult.open .searchresult-body {
+    display:block;
+}
+.rdfazer-searchresult-head {
+    cursor:hand;
+    cursor:pointer;
+}
+#rdfazer-manual .buttons button {
+    width: 1em;
+    height: 1em;
+    padding: 5px;
+    box-sizing: initial;
 }
