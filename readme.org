@@ -22,7 +22,7 @@ The interface of RDFazer is shown in the image below.
 - *settings:* This button allows the modification of the RDFazer settings, see [[Configuration][the configuration section]]. The settings are persisted on the local machine for later reuse.
 - *highlight selected:* This button opens a dialog that allows the user to tag the currently selected text on his webpage, see below. This selection can span multiple HTML elements and element borders (have a look at the [[https://github.com/timdown/rangy][rangy]] library if you're interested in how this is done).
 
-To tag a concept, select the part of text you want to tag and click the 'highlight selected' button. To remove a tag, click it and a dialog will pop up that allows you to remove the tag.
+To tag a concept, select the part of text you want to tag and click the 'highlight selected' button. 
 
 ** Search SPARQL endpoint
 RDFazer allows a search of any SPARQL endpoint (see the [[Configuration][the configuration section]] for how to configure the search). The interface for the search is shown below.
@@ -44,6 +44,8 @@ The manual tagging interface is less powerful than the search interface. It only
 
 [[file:doc-img/manual.png]]
 
+** Removing tagged concepts
+To remove a tag, click it and a dialog will pop up that allows you to remove the tag. The highlight will be removed, the stored information on the highlighted concept will be removed and the highlight's tag will be removed in RDFazer's panel. There is /no way to retrieve the tag/.
 * Installation
 RDFazer is a chrome browser extension. To install:
 1) clone this git repository anywhere on your file system.
@@ -192,5 +194,5 @@ The previous snippets combine to the following configuration json file:
 - [X] allow setting of storedInfo properties 
 - [X] add actual readme
 - [X] Build final CSS style
-- [ ] Add paging to search results
-- [ ] Allow removal of results of an earlier session.
+- [X] Allow removal of results of an earlier session.
+- [?] Add paging to search results

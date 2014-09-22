@@ -334,14 +334,7 @@ var Rdfazer = {
             ignoreWhiteSpace: true,
             elementTagName: "a",
             elementProperties: {
-                href: url,
-                onclick: function() {
-                    var highlight = highlighter.getHighlightForElement(this);
-                    if (window.confirm("Delete this highlight (URL " + url + ")?")) {
-                        highlighter.removeHighlights( [highlight] );
-                    }
-                    return false;
-                }
+                href: url
             },
             elementAttributes: {
                 about: localHighlightUri,
@@ -352,6 +345,26 @@ var Rdfazer = {
         highlighter.highlightRanges("highlight",[this.currentRange]);
 
         this.addHighlightedConcept(localHighlightUri,results);
+    },
+
+    handleHighlightClick:function(){
+	// note: context = jquery highlight that was clicked
+	var highlight = $(this);
+	var title = highlight.attr("title");
+	var uri = highlight.attr("about");
+	
+	var info = (title && title!="")?("("+title+")"):("("+uri+")"); 
+        if (window.confirm("Delete this highlight "+info+"?")) {
+	    var toReplace = $(".highlight[about='"+uri+"']");
+	    for (var i =0, node; node = toReplace[i]; i++){
+		$(node).replaceWith(node.innerHTML);
+	    }
+	    
+	    $("#rdfazerconcepts div[about='"+uri+"']").remove(); 
+	    $(".highlightTag[highlight='"+uri+"']").remove(); 
+        }
+	
+	return false;
     },
 
     addHighlightedConcept:function(localHighlightUri,results){
@@ -512,6 +525,7 @@ var Rdfazer = {
     },
     
     showHighlights:function(){
+	var self = this;
         var content = $("#rdfazerInterface .rdfazercontent");
         content.empty();
         
@@ -521,6 +535,23 @@ var Rdfazer = {
         
         for(var i=0, highlight; highlight=highlights[i]; i++){
             var node = $(highlight);
+
+	    // remove the previous listener from the highlight
+	    var events = $._data(highlight, "events");
+	    var hasHandler = false;
+	    if(events && events.click){
+		for(var j =0, event; event= events.click[j]; j++){
+		    if(event.handler == self.handleHighlightClick){
+			hasHandler = true;
+		    }
+		}
+	    }
+
+	    if(!hasHandler){
+		node.click(self.handleHighlightClick);
+	    }
+
+	    // add all highlights in side pane
             var highlightURI = node.attr("about");
             var urinodes = $("#rdfazerconcepts div[about='"+highlightURI+"'] div[rel='http://localhost/highlightFor'] > div[about]");
             var labels = [];
