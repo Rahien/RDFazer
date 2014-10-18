@@ -651,18 +651,27 @@ var Rdfazer = {
 	var query = "";
 	var self = this;
 	query = this.getConfigProp("query").replace(/\$searchTerm/g,searchTerm);
-	this.toggleLoading();
+	this.startLoading();
 	this.sparqlQuery(query, function(data){
-	    self.showResults(data.head.vars,data.results.bindings);
-	    self.toggleLoading();
+	    try{
+		self.showResults(data.head.vars,data.results.bindings);
+	    }finally{
+		self.endLoading();
+	    }
 	},function(result){
 	    self.message("error","Could not query the server for matching terms."+(result.responseText?"\nServer response:\n"+result.responseText:""));
-	    self.toggleLoading();
+	    self.endLoading();
 	});
     },
     
-    toggleLoading:function(){
-	$("#rdfazerdialog .searchloading").toggleClass("hidden");
+    startLoading:function(){
+	$("#rdfazerdialog .searchloading").removeClass("hidden");
+    },
+    endLoading:function(){
+	var spinner = 	$("#rdfazerdialog .searchloading");
+	if(!spinner.hasClass("hidden")){
+	    spinner.addClass("hidden");
+	}
     },
 
     clearResults:function(all){
@@ -692,7 +701,7 @@ var Rdfazer = {
 	    var details = ""
 
 	    for(var j = 0, varname; varname = vars [j]; j++){
-		details += "<div><span>"+varname+":</span><span>"+binding[varname].value+"</span></div>"
+		details += "<div><span>"+varname+":</span><span>"+((binding[varname]===undefined || binding[varname]===null)?"":binding[varname].value)+"</span></div>"
 	    }    
 	    container.find(".toggle").click(function(event){
 		$(this).parent().parent().toggleClass("open");
@@ -735,13 +744,13 @@ var Rdfazer = {
 	   virtuoso. */
 	$.ajax({
 	    headers: { 
-		Accept : "application/sparql-results+json,application/json,text/html,application/xhtml+xml,application/xml; charset=utf-8",
-		"Content-Type": "text/plain; charset=utf-8"
+		Accept : "application/sparql-results+json,application/json,text/html,application/xhtml+xml,application/xml; charset=utf-8"		
 	    },
 	    url:this.getConfigProp("sparql"),
 	    data:{
 		query:query,
-		format:"application/sparql-results+json"
+		format:"application/sparql-results+json",
+		output:"json"
 	    },
 	    success:success,
 	    error:error
@@ -813,7 +822,7 @@ var Rdfazer = {
 	profile:"esco",
 	profiles: {
 	    esco: {
-		query: "select ?target ?label (group_concat(distinct(?labels),\"| \") as ?altLabels) (group_concat(distinct(?types), \"| \") as ?types)\n where { \n{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \nUNION\n { ?target a <http://ec.europa.eu/esco/model#Skill> . } \n?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. \n?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . \nFILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels) = \"en\") . } \nUNION\n { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2.\n ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels)= \"en\") . \n} \nOPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n. FILTER (lang (?labels) = \"en\") \n}\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
+		query: "select ?target ?label (group_concat(distinct(?labels); separator=\"| \") as ?altLabels) (group_concat(distinct(?types); separator=\"| \") as ?types)\n where { \n{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \nUNION\n { ?target a <http://ec.europa.eu/esco/model#Skill> . } \n?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. \n?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . \nFILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels) = \"en\") . } \nUNION\n { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2.\n ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels)= \"en\") . \n} \nOPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n. FILTER (lang (?labels) = \"en\") \n}\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
 		uriToUrl:"'https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/' +uri",
 		labelProperty:"label",
 		labelPredicate:"http://www.w3.org/2004/02/skos/core#prefLabel",
@@ -824,7 +833,7 @@ var Rdfazer = {
 		}
 	    },
 	    "default (skos)": {
-		query: "select ?target ?label (group_concat(distinct(?labels),\"| \") as ?altLabels)\n (group_concat(distinct(?types), \"| \") as ?types) where {\n ?target <http://www.w3.org/2004/02/skos/core##prefLabel> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2004/02/skos/core#prefLabel> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . }\n UNION {\n ?target <http://www.w3.org/2004/02/skos/core#altLabel> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) .\n } OPTIONAL {\n?target <http://www.w3.org/2004/02/skos/core#altLabel> ?labels.\n FILTER (lang (?labels) = \"en\") }\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
+		query: "select ?target ?label (group_concat(distinct(?labels); separator=\"| \") as ?altLabels)\n (group_concat(distinct(?types); separator=\"| \") as ?types) where {\n ?target <http://www.w3.org/2004/02/skos/core##prefLabel> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2004/02/skos/core#prefLabel> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . }\n UNION {\n ?target <http://www.w3.org/2004/02/skos/core#altLabel> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) .\n } OPTIONAL {\n?target <http://www.w3.org/2004/02/skos/core#altLabel> ?labels.\n FILTER (lang (?labels) = \"en\") }\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
 		uriToUrl:"uri",
 		labelProperty:"label",
 		labelPredicate:"http://www.w3.org/2004/02/skos/core#prefLabel",
@@ -833,6 +842,38 @@ var Rdfazer = {
 		    altLabels: {predicate:"http://www.w3.org/2004/02/skos/core#altLabel", type:"property", csv:"|", decorate:{"xml:lang":"en"}},
 		    types: {predicate:"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", type: "relation", csv:"|"}
 		}
+	    },
+	    "pure 1.1, esco": {
+		query: "select ?target ?label (group_concat(distinct(?labels); separator=\"| \") as ?altLabels) (group_concat(distinct(?ttypes); separator=\"| \") as ?types)\n"+
+		    "where { \n"+
+		    "{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \n"+
+		    "UNION\n"+
+		    "{ ?target a <http://ec.europa.eu/esco/model#Skill> . } \n"+
+		    "?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n"+
+		    "?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?ttypes .\n"+
+		    "{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. \n"+
+		    "?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . \n"+
+		    "} UNION\n"+
+		    "{ ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2.\n"+
+		    "?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels .\n"+
+		    "} \n"+
+		    "FILTER (regex(?plabels,\".*$searchTerm.*\",\"i\")) . \n"+
+		    "FILTER (lang(?plabels) = \"en\") . \n"+
+		    "OPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n"+
+		    ". ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n"+
+		    ". FILTER (lang (?labels) = \"en\") \n"+
+		    "}\n"+
+		    "FILTER (lang (?label) = \"en\") \n"+
+		    "} GROUP BY ?target ?label",
+		uriToUrl:"'https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/' +uri",
+		labelProperty:"label",
+		labelPredicate:"http://www.w3.org/2004/02/skos/core#prefLabel",
+		storedInfo: {
+		    label: {predicate:"http://www.w3.org/2004/02/skos/core#prefLabel", type:"property", decorate:{"xml:lang":"en"}},
+		    altLabels: {predicate:"http://www.w3.org/2004/02/skos/core#altLabel", type:"property", csv:"|", decorate:{"xml:lang":"en"}},
+		    types: {predicate:"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", type: "relation", csv:"|"}
+		}
+
 	    }
 
 	}
