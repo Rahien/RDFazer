@@ -8,8 +8,8 @@
 	"default_icon": "icon.png"
     },
     "background": {
-        "scripts":["background.js"]
+        "scripts":["lib/jquery-2.0.3.min.js","background.js"]
     },
-    "permissions": ["tabs", "<all_urls>","storage"],
-    "web_accessible_resources": ["lib/jquery-2.0.3.js","contentscript.css","settings.html", "interface.html","dialog.html","lib/jquery-ui.css","lib/images/*"]
+    "permissions": ["tabs", "<all_urls>","storage", "http://*/*", "https://*/*", "https://*/"],
+    "web_accessible_resources": ["lib/jquery-2.0.3.min.js","contentscript.css","settings.html", "interface.html","dialog.html","lib/jquery-ui.css","lib/images/*"]
 }

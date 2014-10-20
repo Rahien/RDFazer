@@ -1,9 +1,3 @@
-function sendMessage (messagePayload, messageHandler){
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, messagePayload, messageHandler);
-    });
-}
-
 var Rdfazer = {
     currentRange:null, 
     baseURI:"http://localhost",
@@ -740,20 +734,16 @@ var Rdfazer = {
     },
 
     sparqlQuery:function(query,success,error){
-	/* for the interested reader that would like to know why the headers are a mess:
-	   virtuoso. */
-	$.ajax({
-	    headers: { 
-		Accept : "application/sparql-results+json,application/json,text/html,application/xhtml+xml,application/xml; charset=utf-8"		
-	    },
-	    url:this.getConfigProp("sparql"),
-	    data:{
-		query:query,
-		format:"application/sparql-results+json",
-		output:"json"
-	    },
-	    success:success,
-	    error:error
+
+	chrome.runtime.sendMessage(
+	    {rdfazerQuery:query, 
+	     rdfazerUrl: this.getConfigProp("sparql")
+	    }, function(result){
+		if(result.success){
+		success(result.result);
+	    }else{
+		error(result.result);
+	    }
 	});
     },
 
