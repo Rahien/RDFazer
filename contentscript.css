@@ -306,7 +306,7 @@ div#rdfazer-manual {
 
 .rdfazermessage {
     width:100%;
-    padding: 1em 0;
+    padding: 1em 1em !important;
     text-align: left;
     position: fixed;
     top: 0;
@@ -321,6 +321,7 @@ div#rdfazer-manual {
 .rdfazermessage-content {
     width: 960px;
     margin: 0 auto;
+    position:relative;
 }
 .rdfazermessage.error {
     background-color:pink;

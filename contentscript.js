@@ -819,9 +819,9 @@ var Rdfazer = {
     config: {
 	sparql:"http://localhost:8890/sparql",
 	fileURI:"",
-	profile:"esco",
+	profile:"ESCO (virtuoso)",
 	profiles: {
-	    esco: {
+	    "ESCO (virtuoso)": {
 		query: "select ?target ?label (group_concat(distinct(?labels); separator=\"| \") as ?altLabels) (group_concat(distinct(?types); separator=\"| \") as ?types)\n where { \n{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \nUNION\n { ?target a <http://ec.europa.eu/esco/model#Skill> . } \n?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n ?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?types .\n{ ?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing1. \n?thing1 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels . \nFILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels) = \"en\") . } \nUNION\n { ?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing2.\n ?thing2 <http://www.w3.org/2008/05/skos-xl#literalForm> ?plabels .\n FILTER (bif:contains(?plabels,\"'$searchTerm*'\")) . \nFILTER (lang(?plabels)= \"en\") . \n} \nOPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n. ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n. FILTER (lang (?labels) = \"en\") \n}\nFILTER (lang (?label) = \"en\") \n} GROUP BY ?target ?label",
 		uriToUrl:"'https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/' +uri",
 		labelProperty:"label",
@@ -843,7 +843,7 @@ var Rdfazer = {
 		    types: {predicate:"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", type: "relation", csv:"|"}
 		}
 	    },
-	    "pure 1.1, esco": {
+	    "ESCO (pure SPARQL 1.1)": {
 		query: "select ?target ?label (group_concat(distinct(?labels); separator=\"| \") as ?altLabels) (group_concat(distinct(?ttypes); separator=\"| \") as ?types)\n"+
 		    "where { \n"+
 		    "{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \n"+
@@ -859,6 +859,31 @@ var Rdfazer = {
 		    "} \n"+
 		    "FILTER (regex(?plabels,\".*$searchTerm.*\",\"i\")) . \n"+
 		    "FILTER (lang(?plabels) = \"en\") . \n"+
+		    "OPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n"+
+		    ". ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n"+
+		    ". FILTER (lang (?labels) = \"en\") \n"+
+		    "}\n"+
+		    "FILTER (lang (?label) = \"en\") \n"+
+		    "} GROUP BY ?target ?label",
+		uriToUrl:"'https://ec.europa.eu/esco/web/guest/concept/-/concept/thing/en/' +uri",
+		labelProperty:"label",
+		labelPredicate:"http://www.w3.org/2004/02/skos/core#prefLabel",
+		storedInfo: {
+		    label: {predicate:"http://www.w3.org/2004/02/skos/core#prefLabel", type:"property", decorate:{"xml:lang":"en"}},
+		    altLabels: {predicate:"http://www.w3.org/2004/02/skos/core#altLabel", type:"property", csv:"|", decorate:{"xml:lang":"en"}},
+		    types: {predicate:"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", type: "relation", csv:"|"}
+		}
+
+	    },
+	    "ESCO (fuseki, text index)" : {
+		query: "select ?target ?label (group_concat(distinct(?labels); separator=\"| \") as ?altLabels) (group_concat(distinct(?ttypes); separator=\"| \") as ?types)\n"+
+		    "where { \n"+
+		    "{ ?target a <http://ec.europa.eu/esco/model#Occupation> . } \n"+
+		    "UNION\n"+
+		    "{ ?target a <http://ec.europa.eu/esco/model#Skill> . } \n"+
+		    "?target <http://www.w3.org/2008/05/skos-xl#prefLabel> ?thing3. ?thing3 <http://www.w3.org/2008/05/skos-xl#literalForm> ?label .\n"+
+		    "?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?ttypes .\n"+
+		    "?target <http://jena.apache.org/text#query> \"$searchTerm\". \n"+
 		    "OPTIONAL {?target <http://www.w3.org/2008/05/skos-xl#altLabel> ?thing4\n"+
 		    ". ?thing4 <http://www.w3.org/2008/05/skos-xl#literalForm> ?labels\n"+
 		    ". FILTER (lang (?labels) = \"en\") \n"+
